@@ -1,0 +1,43 @@
+<!--{widget}-->
+<div id="{i#id}" class="jstplview">
+	<div class="gtl">
+		<span id="{i#gtl}">Шаблон</span>
+	</div>
+
+	<div class="viewbox">	
+		<div id="{i#empty}">
+			Необходимо выбрать JS компонент
+		</div>
+		
+		<div id="{i#loading}" class="modloading">
+			<img src="/images/loading.gif"> Идет загрузка...
+		</div>
+		
+		<div id="{i#view}">
+			<div id="{i#source}"></div>
+		</div>
+	</div>
+</div>
+
+<!--{row}-->
+<div id="{i#id}" class="trow">
+	<div id="{i#wrp}">
+		<div class="thd">
+			{v#tl}
+			<div class="tmnu">
+				<a href="#" id="{i#bcreate}" class="bcreate">Создать фразу</a>
+				<select id="{i#vwtp}">
+					<option value="1">Результат</option>
+					<option value="2">Оригинал</option>
+					<option value="3">Редактор</option>
+				</select>
+			</div>
+		</div>
+			
+		<div id="{i#vresult}" class="tresult"></div>
+		<div id="{i#vsource}" class="tsource"></div>
+		<div id="{i#veditor}" class="teditor">
+			<textarea id="{i#editor}"></textarea>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,9 @@
+.aw-localize .modview .complist {
+	margin-bottom: 10px;
+}
+
+.aw-localize .modview .modempty {
+	border: 1px solid #8C8D8E;
+    padding: 7px;
+}
+

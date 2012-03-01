@@ -1,0 +1,20 @@
+/*
+@version $Id$
+@copyright Copyright (C) 2012 Abricos All rights reserved.
+@license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+*/
+
+var Component = new Brick.Component();
+Component.entryPoint = function(){
+	
+	if (Brick.Permission.check('{C#MODNAME}', '10') != 1){ return; }
+	
+	var os = Brick.mod.bos;
+	
+	var app = new os.Application(this.moduleName);
+	app.icon = '/modules/localize/images/app_icon.png';
+	app.entryComponent = 'wspace';
+	app.entryPoint = 'ws';
+	
+	os.ApplicationManager.register(app);
+};

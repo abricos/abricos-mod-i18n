@@ -1,0 +1,73 @@
+.aw-localize .clear { clear: both; }
+.aw-localize .right { text-align: right; }
+.aw-localize .mtp10 { margin-top: 10px; }
+.aw-localize .red { color: red; }
+.aw-localize .green { color: green; }
+.aw-localize a.abtn {
+	text-decoration: none;
+	border-bottom: 1px dotted;
+}
+.aw-localize .bdrbtn {
+	border-bottom: 1px solid #E3E3D7;
+}
+.aw-localize .hide {
+	display: none;
+} 
+.aw-localize .w100 { width: 100%; }
+
+.aw-localize .vline { 
+	border-left: 1px solid #D9D9D9;
+}
+.aw-localize .hline { 
+	border-bottom: 1px solid #D9D9D9;
+}
+
+.aw-localize .w300px {
+	width: 300px;
+}
+
+.aw-localize .fld dl {
+	clear: left;
+	margin: 0 0 10px;
+}
+.aw-localize .fld dt {
+	float: left;
+	font-weight: bold;
+	width: 11em;
+	padding-right: .5em;
+	font-weight: normal;
+	color: #555555;
+}
+.aw-localize .fld dd {
+    margin: 0 0 0 11em;
+    padding: 0 0 7px 12px;
+    text-align: left;
+}
+.aw-localize .fld dd dd {
+	padding-bottom: 1px;
+}
+.aw-localize .fld dd input.w300,
+.aw-localize .fld dd textarea.w300 {
+	width: 300px;
+}
+.aw-localize .fld dd textarea {
+	height: 100px;
+}
+.aw-localize .fld dd input.btn {
+	width: auto;
+}
+
+/* * * * * Fixed Row * * * * */
+.aw-localize .fixrw {
+	position: relative;
+	overflow: hidden;
+	white-space: nowrap;
+}
+.aw-localize .fixrw .shadow {
+	background: url("/modules/localize/images/shadow.png") repeat-y scroll 0 0 transparent;
+    height: 1.3em;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 16px;
+}
