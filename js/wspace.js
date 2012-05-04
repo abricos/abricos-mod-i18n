@@ -17,98 +17,15 @@ Component.entryPoint = function(NS){
 		E = YAHOO.util.Event,
 		L = YAHOO.lang;
 
+	var R = NS.roles;
 	var buildTemplate = this.buildTemplate;
 	
-	var WSMenuWidget = function(container, callback){
-		this.init(container, callback);
+	var GMID = {
+		'ModuleWorkspaceWidget': 'modws',
+		'AboutWidget': 'about'
 	};
-	WSMenuWidget.prototype = {
-		init: function(container, callback){
-			
-			var nav = NS.navigator;
-			
-			buildTemplate(this, 'gbmenu,gmitemhome,gmitem');
-			container.innerHTML = this._TM.replace('gbmenu', {
-				'url': nav.ws
-				/*,
-				'urlabout': nav.about,
-				'urlgroupnew': nav.group.create
-				/*/
-			});
-			var __self = this;
-			NS.initLocalizeManager(function(mgr){
-				__self.onInitLocalizeManager(mgr);
-				NS.life(callback(mgr));
-			});
-		},
-		onInitLocalizeManager: function(mgr){
-			this.renderItems();
-			this.selectGroupMItem(0);
-		},
-		destroy: function(){
-		},
-		setParam: function(bosapp, page){
-			this.bosapp = bosapp;
-			this.page = page;
-			this.render();
-		},
-		renderItems: function(){
-			var TM = this._TM, lst = "";
-			lst += TM.replace('gmitemhome', {
-				'url': NS.navigator.ws
-			});
-			/*
-			NS.localizeManager.modules.foreach(function(mod){
-				lst += TM.replace('gmitem', {
-					'id': mod.id,
-					'tl': mod.name,
-					'url': NS.navigator.module.view(mod.id)
-				});
-			});
-			/**/
-			TM.getEl('gbmenu.mhome').innerHTML = lst;
-		},
-		selectMItem: function(sItem){
-			var TM = this._TM, items = ['home','newgroup','about'];
-			for (var i=0;i<items.length;i++){
-				var item = items[i], el = TM.getEl('gbmenu.gm'+item);
-				if (item == sItem){
-					Dom.addClass(el, 'sel');
-				}else{
-					Dom.removeClass(el, 'sel');
-				}
-			}
-		},
-		selectGroupMItem: function(gid){
-			
-			var TM = this._TM, TId=this._TId,
-				els = TM.getEl('gbmenu.mhome').childNodes;
-			
-			for (var i=0;i<els.length;i++){
-				Dom.removeClass(els[i], 'current');
-			}
-			if (gid == 0){
-				Dom.addClass(TM.getEl('gmitemhome.id'), 'current');
-			}else{
-				Dom.addClass(TId['gmitem']['id']+'-'+gid, 'current');
-			}
-		},
-		selectMItemByUri: function(wName, p1){
-			var mitem = '', gid = 0;
-			switch(wName){
-			case 'GroupEditWidget':
-				if (p1 > 0){ gid = p1; mitem = 'home';
-				} else { mitem='newgroup'; }
-				break;
-			case 'GroupViewWidget':  mitem='home'; gid=p1; break;
-			case 'AboutWidget': mitem='about'; break;
-			}
-			this.selectGroupMItem(gid);
-			this.selectMItem(mitem);
-		}
-	};
-	NS.WSMenuWidget = WSMenuWidget;
-
+	GMIDI = {};
+	
 	var WSPanel = function(pgInfo){
 		this.pgInfo = pgInfo || [];
 		
@@ -119,20 +36,21 @@ Component.entryPoint = function(NS){
 	YAHOO.extend(WSPanel, Brick.widget.Panel, {
 		initTemplate: function(){
 			buildTemplate(this, 'panel');
-			return this._TM.replace('panel');
+			
+			var nav = NS.navigator;
+			return this._TM.replace('panel', {
+				'urlhome': nav.ws,
+				'urlabout': nav.about
+			});
 		},
 		onLoad: function(){
-			var __self = this;
-			
 			this.widget = null;
-			
-			this.gmenu = new NS.WSMenuWidget(this._TM.getEl('panel.gmenu'), function(){
+			var __self = this;
+			NS.initLocalizeManager(function(mgr){
 				__self.showPage(__self.pgInfo);
 			});
 		},
-		destroy: function(){
-			WSPanel.superclass.destroy.call(this);
-		},
+		destroy: function(){},
 		showPage: function(p){
 			p = L.merge({
 				'component': 'modws',
@@ -140,8 +58,6 @@ Component.entryPoint = function(NS){
 				'p1': '', 'p2': '', 'p3': ''
 			}, p || {});
 
-			if (L.isNull(NS.localizeManager)){ return; }
-			
 			var __self = this, TM = this._TM, gel = function(n){ return TM.getEl('panel.'+n); };
 			Dom.setStyle(gel('board'), 'display', 'none');
 			Dom.setStyle(gel('loading'), 'display', '');
@@ -156,7 +72,6 @@ Component.entryPoint = function(NS){
 			
 			var wName = p['wname'];
 			if (!NS[wName]){ return; }
-
 			
 			if (!L.isNull(this.widget)){
 				this.widget.destroy();
@@ -167,7 +82,36 @@ Component.entryPoint = function(NS){
 			
 			this.widget = new NS[wName](gel('board'), p['p1'], p['p2'], p['p3']);
 			
-			this.gmenu.selectMItemByUri(wName, p['p1']);
+			for (var n in GMID){
+				
+				var pfx = GMID[n], 
+					miEl = gel('m'+pfx),
+					mtEl = gel('mt'+pfx);
+
+				if (wName == n){
+					Dom.addClass(miEl, 'sel');
+					Dom.setStyle(mtEl, 'display', '');
+					
+					/*
+					var mia = GMIDI[pfx];
+					if (L.isArray(mia)){
+						
+						for (var i=0;i<mia.length;i++){
+							var mtiEl = gel('i'+pfx+mia[i]);
+							if (mia[i] == this.widget.wsMenuItem){
+								Dom.addClass(mtiEl, 'current');
+							}else{
+								Dom.removeClass(mtiEl, 'current');
+							}
+						}
+					}
+					/**/
+					
+				}else{
+					Dom.removeClass(miEl, 'sel');
+					Dom.setStyle(mtEl, 'display', 'none');
+				}
+			}
 		}
 	});
 	NS.WSPanel = WSPanel;

@@ -2,7 +2,27 @@
 <div class='hd'>Локализация</div>
 <div class='bd aw-localize'>
 
-	<div id="{i#gmenu}"></div>
+	<div id="{i#gmenu}">
+	
+		<div class="gheadermenu">
+			<h2>Локализация</h2>
+			
+			<a href="{v#urlhome}" class="logo">
+				<img class="logo" src="/modules/localize/images/logo-96x96.png" />
+			</a>
+			
+			<ul class="topmenu">
+				<li id="{i#mmodws}"><a href="{v#urlhome}" title="Главная">Главная</a></li>
+				<li id="{i#mabout}"><a href="{v#urlabout}" title="">О приложении</a></li>
+			</ul>
+			<div class="clear"></div>
+		</div>
+	
+		<div class="gbmenu">
+			<br class="clear" />
+			<div class="line"></div>
+		</div>
+	</div>
 	
 	<div id="{i#loading}" class="ws-loading">
 		<img src="/images/loading.gif" /> Идет загрузка данных<br />
@@ -19,36 +39,6 @@
 
 <!--{home}-->
 <div id="{i#id}" class='wspage'>Добро пожаловать</div>
-
-<!--{gbmenu}-->
-<div class="gheadermenu">
-	<h2>Локализация</h2>
-	
-	<img class="logo" src="/modules/localize/images/logo-96x96.png" />
-	
-	<ul class="topmenu">
-		<li class="sel" id="{i#gmhome}"><a href="{v#url}" title="Список модулей">Модули</a></li>
-		<li id="{i#gmabout}"><a href="{v#urlabout}" title="">О приложении</a></li>
-	</ul>
-	<div class="clear"></div>
-</div>
-
-<div class="gbmenu">
-
-	<div id="{i#mhome}" class="gbitems">
-	</div>
-	
-	<div id="{i#maccountd}" class="gbitems" style="display: none;">
-		<a id="{i#miaccount}" class="gbitem" href="{v#urlaws}">Бухгалтерия</a>
-		<a id="{i#miaccountnew}" class="gbitem" href="{v#urlawsnew}">+ Создать бухгалтерию</a>
-	</div>
-	
-	<br class="clear" />
-	<div class="line"></div>
-</div>
-
-<!--{gmitemhome}-->
-<a id="{i#id}" class="gbitem" href="{v#url}" style="display: none">Главная</a>
 
 <!--{gmitem}-->
 <a id="{i#id}-{v#id}" class="gbitem" href="{v#url}">{v#tl}</a>

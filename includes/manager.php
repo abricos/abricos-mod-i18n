@@ -135,10 +135,15 @@ Brick.mod.localize.tempData['".$module."'] = lngData;
 		return $content;
 	}
 	
-	private function BuildJSLanguageFileName($module, $component, $lngid){
+	private function BuildJSLanguageDirPath($module){
 		$module = str_replace("..", "", $module);
+		return CWD."/modules/".$module."/js/langs/";
+	}
+	
+	private function BuildJSLanguageFileName($component, $lngid){
 		$component = str_replace("..", "", $component);
-		return CWD."/modules/".$module."/js/langs/".$component."_".$lngid.".js";
+		$lngid = str_replace("..", "", $lngid);
+		return $component."_".$lngid.".js";
 	}
 	
 	private function JSLanguagePhraseToText($ph, $lvl){
@@ -177,9 +182,16 @@ Brick.mod.localize.tempData['".$module."'] = lngData;
 		
 		$text .= "}}});";
 		
-		$file = $this->BuildJSLanguageFileName($module, $component, $lngid);
+		$dir = $this->BuildJSLanguageDirPath($module);
+		if (!is_dir($dir)){
+			if (!mkdir($dir)){
+				return false;
+			}
+		}
+	
+		$file = $dir.$this->BuildJSLanguageFileName($component, $lngid);
 		
-		$hdl = @fopen($file, 'wb');
+		$hdl = fopen($file, 'wb');
 		
 		if (empty($hdl)){
 			return false;
@@ -225,7 +237,8 @@ Brick.mod.localize.tempData['".$module."'] = lngData;
 	
 	public function JSComponentSave($module, $component, $template, $languages){
 		if (!$this->IsAdminRole()){ return null; }
-
+		
+		$ret = new stdClass();
 		$lng = new stdClass();
 		$tpl = new stdClass();
 		
@@ -240,7 +253,6 @@ Brick.mod.localize.tempData['".$module."'] = lngData;
 			$tpl->text = $this->JSComponentTemplate($module, $component);
 		}
 		
-		$ret = new stdClass();
 		$ret->template = $tpl;
 		$ret->language = $lng;
 		return $ret;

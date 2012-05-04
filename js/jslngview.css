@@ -39,6 +39,32 @@
 	background-color: #FFF0C6;
 }
 
+.aw-localize .jslngview a.cmpstnew {
+	display: none;
+	text-decoration: none;
+	font-weight: bold;
+	color: green;
+	font-size: 1.5em;
+	margin-right: 5px;
+}
+
+.aw-localize .jslngview a.cmpstnew:HOVER {
+	text-decoration: underline;
+}
+.aw-localize .jslngview .fcmpstnew a.cmpstnew {
+	display: inline;
+}
+.aw-localize .jslngview .fcmpstnew .amenu {
+	display: none !important;
+}
+
+/*
+.aw-localize .jslngview .fcmpstnew span.dt,
+.aw-localize .jslngview .fcmpstnew span.dd {
+	color: green;
+}
+/**/
+
 /* * * * * MENU * * * * */
 .aw-localize .jslngview .lrow .amenu {
 	position: absolute;

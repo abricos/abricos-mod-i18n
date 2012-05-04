@@ -32,11 +32,12 @@ Component.entryPoint = function(NS){
 			this.phraseUpdateEvent = new CE('phraseUpdateEvent');
 			
 			var __self = this;
-			this.languageSelectWidget = new NS.LanguageSelectWidget(TM.getEl('widget.lngsel'), function(lngid){
+			this.lngSelWidget = new NS.LanguageSelectWidget(TM.getEl('widget.lngsel'), function(lngid){
 				__self.render();
 			});
-
-			this.languageSelectBaseWidget = new NS.LanguageSelectWidget(TM.getEl('widget.lngselbase'), function(lngid){
+			this.lngSelWidget.setValue('en');
+			
+			this.lngSelBaseWidget = new NS.LanguageSelectWidget(TM.getEl('widget.lngselbase'), function(lngid){
 				__self.render();
 			});
 			
@@ -50,7 +51,6 @@ Component.entryPoint = function(NS){
 		},
 		destroy: function(){ },
 		onClick: function(el){
-			
 			var tp = this._TId['row'],
 				prefix = el.id.replace(/([0-9]+$)/, ''),
 				numid = el.id.replace(prefix, "");
@@ -60,6 +60,11 @@ Component.entryPoint = function(NS){
 			}
 			
 			switch(prefix){
+			
+			case tp['bsyncadd']+'-': 
+				this.syncAddByKey(numid);
+				return true;
+			
 			case tp['brem']+'-': case tp['bremc']+'-':
 				this.removeByKey(numid);
 				return true;
@@ -118,7 +123,107 @@ Component.entryPoint = function(NS){
 			Dom.setStyle(gel('loading'), 'display', 'none');
 			this.render();
 		},
-		renderRows: function(childs){
+		syncAddByKey: function(k){
+			var edph = this._edPhList[k];
+			if (!edph || edph['st'] != 'n'){ return; }
+			
+			var ph = edph['ph'];
+			
+			var arr = [];
+			while(!L.isNull(ph)){
+				if (L.isNull(ph.parent)){
+					break;
+				}
+				arr[arr.length] = ph;
+				ph = ph.parent;
+			}
+			arr.reverse();
+
+			var comp =  this.component,
+				phSrc = comp.getPhrases(this.lngSelWidget.getValue()),
+				mnm = comp.module.name;
+			
+			for (var i=0;i<arr.length;i++){
+				var ph = arr[i], tId = ph.getTemplateId(mnm), phf = null;
+				phSrc.foreach(function(ch){
+					if (ch.getTemplateId(mnm) == tId){
+						phf = ch;
+						return true;
+					}
+				});
+				if (L.isNull(phf)){
+					phf = new NS.Phrase(ph.id, L.isNull(ph.childs) ? ph.title : {});
+					phf.status = 'n';
+					phSrc.addChild(phf);
+				}
+				phSrc = phf;
+			}
+			
+			this.onPhraseUpdate(edph['ph']);
+			this.render();
+		},
+		renderRows: function(chs1, chs2){
+			
+			var TM = this._TM, lst = "", mnm = this.component.module.name;
+			var edPhList = this._edPhList;
+			
+			
+			// новые
+			for (var i=0;i<chs2.length;i++){
+				var ph = chs2[i],
+					tId = ph.getTemplateId(mnm),
+					find = false;
+
+				for (var ii=0;ii<chs1.length;ii++){
+					if (tId == chs1[ii].getTemplateId(mnm)){
+						find = true;
+					}
+				}
+				if (!find){
+					var schs = "";
+					if (!L.isNull(ph.childs)){
+						schs = this.renderRows([], ph.childs);
+					}
+					var kid = edPhList.length;
+					edPhList[kid] = {'st': 'n', 'ph': ph};
+					lst += TM.replace('row', {
+						'cst': 'fcmpstnew',
+						'key': kid, 'id': ph.id, 'ph': ph.title, 'ch': schs,
+						'edt': schs == "" ? 'edt' : ''
+					});
+					
+				}
+			}			
+			
+			for (var i=0;i<chs1.length;i++){
+				var ph = chs1[i], 
+					k1 = ph.getTemplateId(mnm),
+					find = null;
+				
+				
+				for (var ii=0;ii<chs2.length;ii++){
+					if (chs2[ii].getTemplateId(mnm) == k1){
+						find = chs2[ii];
+					}
+				}	
+				if (!L.isNull(find)){
+					var schs = "";
+					if (!L.isNull(ph.childs)){
+						schs = this.renderRows(ph.childs, find.childs);
+					}
+					var kid = edPhList.length;
+					edPhList[kid] = {'st': '', 'ph': ph};
+					lst += TM.replace('row', {
+						'cst': '',
+						'key': kid, 'id': ph.id, 'ph': ph.title, 'ch': schs,
+						'edt': schs == "" ? 'edt' : ''
+					});
+					
+				}
+			}
+			
+			
+			/*
 			if (L.isNull(childs)){ return ''; }
 			
 			var TM = this._TM, lst = "", keys = this._keys;
@@ -138,6 +243,7 @@ Component.entryPoint = function(NS){
 					'edt': schs == "" ? 'edt' : ''
 				});
 			}
+			/**/
 			
 			return lst;
 		},
@@ -147,15 +253,15 @@ Component.entryPoint = function(NS){
 			var comp = this.component;
 			if (L.isNull(comp)){ return; }
 			
-			var TM = this._TM,
-				lngid = this.languageSelectWidget.getValue(),
-				lst = "";
+			var TM = this._TM;
 
-			if (comp.phrases[lngid]){
-				lst = this.renderRows(comp.phrases[lngid].childs);				
-			}
+			var ph1 = comp.getPhrases(this.lngSelWidget.getValue()),
+				ph2 = comp.getPhrases(this.lngSelBaseWidget.getValue());
 			
-			TM.getEl('widget.table').innerHTML = lst;
+			this._edPhList = [null];
+			
+			TM.getEl('widget.table').innerHTML = 
+				this.renderRows(ph1.childs, ph2.childs);
 		}
 	};
 	NS.JSLanguageViewWidget = JSLanguageViewWidget;

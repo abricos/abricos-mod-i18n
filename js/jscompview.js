@@ -25,6 +25,7 @@ Component.entryPoint = function(NS){
 	};
 	JSComponentViewWidget.prototype = {
 		init: function(container, comp){
+			this._minHeight = 30;
 			
 			var TM = buildTemplate(this, 'widget');
 			container.innerHTML = TM.replace('widget');
@@ -74,6 +75,12 @@ Component.entryPoint = function(NS){
 				this.jsLanguageViewWidget.setComponent(comp);
 			}
 			this.updateSaveStatus();
+			
+			var rg = Dom.getRegion(gel('id')),
+				h = Math.max(rg.height, this._minHeight);
+			
+			Dom.setStyle(gel('id'), 'minHeight', h+'px');
+			this._minHeight = h;
 		},
 		updateSaveStatus: function(){
 			var ischange = false;

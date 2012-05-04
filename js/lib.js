@@ -173,13 +173,14 @@ Component.entryPoint = function(NS){
 			return ph.createPhrase(npath, sText);
 		},
 		getTemplateId: function(mname){
-			var id = this.id+"";
-			var p = this.parent;
-			while(!L.isNull(p)){
-				
-				id = (p.id+"")+'.'+id;
-				p = p.parent;
-				if (L.isNull(p.parent)){ break; }
+			var id = this.id+"", p = this.parent;
+			
+			if (!L.isNull(p.parent)){
+				while(!L.isNull(p)){
+					id = (p.id+"")+'.'+id;
+					p = p.parent;
+					if (L.isNull(p.parent)){ break; }
+				}
 			}
 			return "{#mod."+mname+"."+id+"}";
 		},
@@ -243,6 +244,14 @@ Component.entryPoint = function(NS){
 				this.phrases[lngid] = new Phrase(lngid, ds[fname]);
 			}
 		},
+		getPhrases: function(lngid){
+			var ph = this.phrases[lngid];
+			if (!ph){
+				this.phrases[lngid] = ph  = new Phrase(lngid);
+				ph.status = 'n';
+			}
+			return ph;
+		},
 		createPhrase: function(lngid, path, sText){
 			var fph = this.findPhrase(lngid, path);
 			if (!L.isNull(fph)){
@@ -304,6 +313,9 @@ Component.entryPoint = function(NS){
 						return true;
 					}
 				}, true);
+				if (phlng.status != ''){ 
+					return true;
+				}
 			}
 			return change;
 		},

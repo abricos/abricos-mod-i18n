@@ -2,7 +2,8 @@
 <div id="{i#id}" class="jslngview">
 	<div class="gtl">
 		<span id="{i#gtl}">
-			Языковые фразы: <span id="{i#lngsel}"></span> &nbsp;&nbsp;&nbsp; Базовый <span id="{i#lngselbase}"></span>
+			Языковые фразы: <span id="{i#lngsel}"></span> 
+			&nbsp;&nbsp;&nbsp; Сравить с <span id="{i#lngselbase}"></span>
 		</span>
 	</div>
 
@@ -22,8 +23,10 @@
 </div>
 
 <!--{row}-->
-<div class="lrow {v#edt}">
+<div class="lrow {v#edt} {v#cst}">
 	<div class="tlrow" title="{v#ph}">
+	
+		<a id="{i#bsyncadd}-{v#key}" href="#" class="cmpstnew" title="Добавить">+</a>
 
 		<span class="dt">{v#id}:</span>
 		<span class="dd">{v#ph}</span>
