@@ -64,6 +64,9 @@ Component.entryPoint = function(NS){
 			case tp['bsyncadd']+'-': 
 				this.syncAddByKey(numid);
 				return true;
+			case tp['bsyncdel']+'-': 
+				this.syncDelByKey(numid);
+				return true;
 			
 			case tp['brem']+'-': case tp['bremc']+'-':
 				this.removeByKey(numid);
@@ -87,13 +90,15 @@ Component.entryPoint = function(NS){
 			this.render();
 		},
 		editByKey: function(key){
-			var __self = this, ph = this._keys[key];
+			var __self = this, 
+				ph = this._edPhList[key]['ph'];
 			new PhraseEditorPanel(ph, function(){
 				__self.onPhraseUpdate(ph);
 			});
 		},
 		createByKey: function(key){
-			var __self = this, pph = this._keys[key];
+			var __self = this, 
+				pph = this._edPhList[key]['ph'];
 			var ph = new NS.Phrase();
 			
 			new PhraseEditorPanel(ph, function(){
@@ -102,7 +107,7 @@ Component.entryPoint = function(NS){
 			}, true);
 		},
 		removeByKey: function(key){
-			var __self = this, ph = this._keys[key];
+			var __self = this, ph = this._edPhList[key]['ph'];
 			new PhraseRemovePanel(this.component, ph, function(){
 				__self.onPhraseRemove(ph);
 			});
@@ -121,6 +126,12 @@ Component.entryPoint = function(NS){
 			Dom.setStyle(gel('empty'), 'display', 'none');
 			Dom.setStyle(gel('view'), 'display', '');
 			Dom.setStyle(gel('loading'), 'display', 'none');
+			this.render();
+		},
+		syncDelByKey: function(key){
+			var ph = this._edPhList[key]['ph'];
+			ph.remove();
+			this.onPhraseRemove(ph);
 			this.render();
 		},
 		syncAddByKey: function(k){
@@ -191,35 +202,35 @@ Component.entryPoint = function(NS){
 						'key': kid, 'id': ph.id, 'ph': ph.title, 'ch': schs,
 						'edt': schs == "" ? 'edt' : ''
 					});
-					
 				}
 			}			
 			
 			for (var i=0;i<chs1.length;i++){
-				var ph = chs1[i], 
-					k1 = ph.getTemplateId(mnm),
+				var ph = chs1[i];
+				if (ph.status == 'd'){ continue; }
+				var k1 = ph.getTemplateId(mnm),
 					find = null;
-				
 				
 				for (var ii=0;ii<chs2.length;ii++){
 					if (chs2[ii].getTemplateId(mnm) == k1){
 						find = chs2[ii];
 					}
-				}	
-				if (!L.isNull(find)){
-					var schs = "";
-					if (!L.isNull(ph.childs)){
-						schs = this.renderRows(ph.childs, find.childs);
-					}
-					var kid = edPhList.length;
-					edPhList[kid] = {'st': '', 'ph': ph};
-					lst += TM.replace('row', {
-						'cst': '',
-						'key': kid, 'id': ph.id, 'ph': ph.title, 'ch': schs,
-						'edt': schs == "" ? 'edt' : ''
-					});
-					
 				}
+				
+				var schs = "";
+				if (!L.isNull(ph.childs)){
+					schs = this.renderRows(ph.childs, find.childs);
+				}
+				var kid = edPhList.length;
+				edPhList[kid] = {
+					'st': L.isNull(find) ? 'd' : '', 
+					'ph': ph
+				};
+				lst += TM.replace('row', {
+					'cst': L.isNull(find) ? 'fcmpstdel' : '',
+					'key': kid, 'id': ph.id, 'ph': ph.title, 'ch': schs,
+					'edt': schs == "" ? 'edt' : ''
+				});
 			}
 			
 			

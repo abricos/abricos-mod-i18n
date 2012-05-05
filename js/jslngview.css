@@ -39,21 +39,32 @@
 	background-color: #FFF0C6;
 }
 
-.aw-localize .jslngview a.cmpstnew {
+.aw-localize .jslngview a.cmpstnew,
+.aw-localize .jslngview a.cmpstdel {
 	display: none;
 	text-decoration: none;
 	font-weight: bold;
-	color: green;
 	font-size: 1.5em;
 	margin-right: 5px;
 }
+.aw-localize .jslngview a.cmpstnew {
+	color: green;
+}
+.aw-localize .jslngview a.cmpstdel {
+	color: blue;
+}
 
-.aw-localize .jslngview a.cmpstnew:HOVER {
+.aw-localize .jslngview a.cmpstnew:HOVER,
+.aw-localize .jslngview a.cmpstdel:HOVER {
 	text-decoration: underline;
 }
 .aw-localize .jslngview .fcmpstnew a.cmpstnew {
 	display: inline;
 }
+.aw-localize .jslngview .fcmpstdel a.cmpstdel {
+	display: inline;
+}
+.aw-localize .jslngview .fcmpstnew .amenu,
 .aw-localize .jslngview .fcmpstnew .amenu {
 	display: none !important;
 }
