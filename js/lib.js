@@ -239,9 +239,11 @@ Component.entryPoint = function(NS){
 			this.name = this.id;
 			this.key = d['k'];
 		},
-		setPhrases: function(lngid, ds){
+		setPhrases: function(lngid, ds, revs){
 			for (var fname in ds){
-				this.phrases[lngid] = new Phrase(lngid, ds[fname]);
+				var ph = new Phrase(lngid, ds[fname]);
+				ph.revision = revs[fname] || 0;
+				this.phrases[lngid] = ph;
 			}
 		},
 		getPhrases: function(lngid){
@@ -319,8 +321,16 @@ Component.entryPoint = function(NS){
 			}
 			return change;
 		},
+		_updateData: function(d){
+			if (L.isNull(d)){ return; }
+			if (!d['template']['error']){
+				this._updateTemplate(d['template']['text']);
+			}
+			if (!d['language']['error']){
+				this.module._updateJSLangData(d['language']['text']);
+			}
+		},
 		saveChanges: function(callback){
-			
 			var lngs = {};
 			for (var n in this.phrases){
 				lngs[n] = this.phrases[n].getSaveData();
@@ -336,10 +346,20 @@ Component.entryPoint = function(NS){
 			
 			var __self = this;
 			NS.localizeManager.ajax(sd, function(d){
-				Brick.console(d);
-				if (!L.isNull(d)){
-					// __self._updateTemplate(d);
-				}
+				__self._updateData(d);
+				NS.life(callback, d);
+			});
+		},
+		revertChanges: function(callback){
+			var __self = this;
+			var sd = {
+				'do': 'jscompload',
+				'module': this.module.name,
+				'component': this.name
+			};
+
+			NS.localizeManager.ajax(sd, function(d){
+				__self._updateData(d);
 				NS.life(callback, d);
 			});
 		}
@@ -388,11 +408,15 @@ Component.entryPoint = function(NS){
 		},
 		_updateJSLangData: function(jsScript){
 			NS.tempData = null;
+			NS.tempDataVs = null;
+			
 			Brick.readScript(jsScript);
 
 			if (!L.isObject(NS.tempData)){ return; }
 
-			var lngs = NS.tempData[this.name] || {};
+			var lngs = NS.tempData[this.name] || {},
+				revs = NS.tempDataVs[this.name] || {};
+				
 			NS.tempData = null;
 			
 			for (var lng in lngs){
@@ -401,7 +425,7 @@ Component.entryPoint = function(NS){
 				for (var cname in lngs[lng]){
 					var comp = this.jsComponents.get(cname);
 					if (!L.isNull(comp)){
-						comp.setPhrases(lng, lngs[lng][cname]);
+						comp.setPhrases(lng, lngs[lng][cname], revs[lng][cname]);
 					}
 				}
 			}
@@ -453,13 +477,8 @@ Component.entryPoint = function(NS){
 			var ms = Brick.Modules,
 				list = [];
 			
-			
 			for (var n in ms){
-				
-				var mod = new Module({
-					'id': n,
-					'nm': n
-				});
+				var mod = new Module({'id': n, 'nm': n});
 				
 				for (var i=0,comp;i<ms[n].length;i++){
 					comp = new JSComponent(ms[n][i]);

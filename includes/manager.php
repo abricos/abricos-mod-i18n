@@ -48,6 +48,7 @@ class LocalizeManager extends Ab_ModuleManager {
 			case 'languagejs': return $this->ModuleJSLanguage($d->module);
 			case 'templatejs': return $this->JSComponentTemplate($d->module, $d->component);
 			case 'jscompsave': return $this->JSComponentSave($d->module, $d->component, $d->template, $d->language);
+			case 'jscompload': return $this->JSComponentLoad($d->module, $d->component);
 		}
 		return null;
 	}
@@ -85,16 +86,24 @@ class LocalizeManager extends Ab_ModuleManager {
 		$content = "
 var mainBrick = Brick,
 	lngData = {},
+	lngVs = {},
 	crtComponent = '',
 	crtLangFile = '';
 
 Brick = {'util': {'Language':{
-	'add': function(lng, d){
+	'add': function(lng, d, vs){
 		lngData[lng] = lngData[lng] || {};
+		lngVs[lng] = lngVs[lng] || {};
+		
 		lngData[lng][crtComponent] = lngData[lng][crtComponent] || {};
+		lngVs[lng][crtComponent] = lngVs[lng][crtComponent] || {};
+		
 		lngData[lng][crtComponent][crtLangFile] = lngData[lng][crtComponent][crtLangFile] || {};
+		lngVs[lng][crtComponent][crtLangFile] = lngVs[lng][crtComponent][crtLangFile] || {};
+		
 		d['mod'] = d['mod'] || {};
 		lngData[lng][crtComponent][crtLangFile] = d['mod']['".$module."'] || {};
+		lngVs[lng][crtComponent][crtLangFile] = vs || 0;
 	}
 }}};
 ";
@@ -128,7 +137,10 @@ crtLangFile='".$fi['basename']."';
 Brick = mainBrick;
 Brick.mod.localize.tempData = {};
 Brick.mod.localize.tempData['".$module."'] = lngData;
-		";
+
+Brick.mod.localize.tempDataVs = {};
+Brick.mod.localize.tempDataVs['".$module."'] = lngVs;
+";
 		
 		$content = str_replace("{C#MODNAME}", $module, $content);
 		
@@ -246,12 +258,28 @@ Brick.mod.localize.tempData['".$module."'] = lngData;
 		if ($lng->error){
 			return $ret;
 		}
-		$lng->languages = $this->ModuleJSLanguage($module, $component);
+		$lng->text = $this->ModuleJSLanguage($module, $component);
 		
 		$tpl->error = !$this->JSComponentTemplateSave($module, $component, $template);
 		if (!$tpl->error){
 			$tpl->text = $this->JSComponentTemplate($module, $component);
 		}
+		
+		$ret->template = $tpl;
+		$ret->language = $lng;
+		return $ret;
+	}
+	
+	public function JSComponentLoad($module, $component){
+		$ret = new stdClass();
+		
+		$lng = new stdClass();
+		$lng->error = false;
+		$lng->text = $this->ModuleJSLanguage($module, $component);
+		
+		$tpl = new stdClass();
+		$tpl->error = false;
+		$tpl->text = $this->JSComponentTemplate($module, $component);
 		
 		$ret->template = $tpl;
 		$ret->language = $lng;

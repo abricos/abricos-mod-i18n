@@ -100,8 +100,9 @@ Component.entryPoint = function(NS){
 			var di = prms[0],
 				comp = di['component'],
 				ti = di['titem'],
-				path = comp.name+'.'+ti['n'],
-				lng = this.jsLanguageViewWidget.languageSelectWidget.getValue(),
+				path = comp.name+'.'+ti['n'];
+			
+			var lng = this.jsLanguageViewWidget.lngSelWidget.getValue(),
 				ph = comp.findPhrase(lng, path);
 
 			if (L.isNull(ph)){
@@ -140,10 +141,16 @@ Component.entryPoint = function(NS){
 		},
 		saveChanged: function(){
 			this.jsTemplateViewWidget.applyChanges();
-			this.component.saveChanges();
+			var __self = this;
+			this.component.saveChanges(function(){
+				__self.updateSaveStatus();
+			});
 		},
 		cancelChanged: function(){
-			
+			var __self = this;
+			this.component.revertChanges(function(){
+				__self.updateSaveStatus();
+			});
 		}
 	};
 	

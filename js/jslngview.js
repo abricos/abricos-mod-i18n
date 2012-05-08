@@ -35,7 +35,7 @@ Component.entryPoint = function(NS){
 			this.lngSelWidget = new NS.LanguageSelectWidget(TM.getEl('widget.lngsel'), function(lngid){
 				__self.render();
 			});
-			this.lngSelWidget.setValue('en');
+			// this.lngSelWidget.setValue('en');
 			
 			this.lngSelBaseWidget = new NS.LanguageSelectWidget(TM.getEl('widget.lngselbase'), function(lngid){
 				__self.render();
@@ -174,6 +174,8 @@ Component.entryPoint = function(NS){
 			this.render();
 		},
 		renderRows: function(chs1, chs2){
+			chs1 = L.isNull(chs1) ? [] : chs1;
+			chs2 = L.isNull(chs2) ? [] : chs2;
 			
 			var TM = this._TM, lst = "", mnm = this.component.module.name;
 			var edPhList = this._edPhList;
@@ -232,29 +234,6 @@ Component.entryPoint = function(NS){
 					'edt': schs == "" ? 'edt' : ''
 				});
 			}
-			
-			
-			/*
-			if (L.isNull(childs)){ return ''; }
-			
-			var TM = this._TM, lst = "", keys = this._keys;
-
-			for (var i=0; i<childs.length; i++){
-				var ph = childs[i], schs = "", key = keys.length;
-				
-				if (ph.status == 'd'){ continue; }
-				
-				keys[key] = ph;
-				
-				if (!L.isNull(ph.childs)){
-					schs = this.renderRows(ph.childs);
-				}
-				lst += TM.replace('row', {
-					'key': key, 'id': ph.id, 'ph': ph.title, 'ch': schs,
-					'edt': schs == "" ? 'edt' : ''
-				});
-			}
-			/**/
 			
 			return lst;
 		},
@@ -319,8 +298,8 @@ Component.entryPoint = function(NS){
 			return false;
 		},
 		save: function(){
-			var TM = this._TM, gel = function(n){ return  TM.getEl('editor.'+n); },
-				__self = this;
+			var TM = this._TM, 
+				gel = function(n){ return  TM.getEl('editor.'+n); };
 			
 			Dom.setStyle(gel('btns'), 'display', 'none');
 			Dom.setStyle(gel('bloading'), 'display', '');
