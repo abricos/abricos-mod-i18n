@@ -24,7 +24,7 @@ Component.entryPoint = function(NS){
 		init: function(container, changeCallback){
 
 			var TM = buildTemplate(this, 'select,option');
-			var lngs = LNG['language'];
+			var lngs = NS.localizeManager.languages;
 			var lst = "";
 
 			for (var n in lngs){

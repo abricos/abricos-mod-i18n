@@ -447,6 +447,8 @@ Component.entryPoint = function(NS){
 			
 			this.modules = new ModuleList();
 			
+			this.languages = {};
+			
 			var __self = this;
 			R.load(function(){
 				var sd = {
@@ -474,8 +476,15 @@ Component.entryPoint = function(NS){
 			});
 		},
 		_updateBoardData: function(d){
-			var ms = Brick.Modules,
-				list = [];
+			if (L.isNull(d)){ return; }
+			
+			var a = (d['langs'] || '').replace(/\r/gi, '').split('\n');
+			for (var i=0;i<a.length;i++){
+				var s = a[i].split(':');
+				this.languages[s[0]] = s[1];
+			}
+			
+			var ms = Brick.Modules, list = [];
 			
 			for (var n in ms){
 				var mod = new Module({'id': n, 'nm': n});

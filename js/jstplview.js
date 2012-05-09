@@ -100,7 +100,7 @@ Component.entryPoint = function(NS){
 					rg = Dom.getRegion(gel('vsource'));
 				}
 				var width = Math.max(100, rg.width),
-					height = Math.max(50, rg.height)+3;
+					height = Math.max(50, rg.height)+15;
 				
 				Dom.setStyle(gel('editor'), 'width', width+'px');
 				Dom.setStyle(gel('editor'), 'height', height+'px');

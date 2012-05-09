@@ -75,6 +75,10 @@ class LocalizeManager extends Ab_ModuleManager {
 	public function BoardData(){
 		if (!$this->IsViewRole()){ return null; }
 		$ret = new stdClass();
+		
+		$text = file_get_contents(CWD."/modules/localize/langs.txt");
+		$ret->langs = $text;
+		
 		return $ret;
 	}
 	
@@ -161,18 +165,20 @@ Brick.mod.localize.tempDataVs['".$module."'] = lngVs;
 	private function JSLanguagePhraseToText($ph, $lvl){
 		$t = str_repeat("\t", $lvl);
 		if (!is_array($ph->chs)){
-			return $t."'".$ph->id."': '".stripcslashes($ph->tl)."'";
+			$s = addslashes($ph->tl);
+			$s = str_replace("\n", "\\n", $s);
+			$s = str_replace("\r", "\\r", $s);
+			return $t."'".$ph->id."': '".$s."'";
 		}
 		$text = $t."'".$ph->id."': {\n";
 		
-		$arr = array();
-		for ($i=0;$i<count($ph->chs);$i++){
-			$s = $this->JSLanguagePhraseToText($ph->chs[$i], $lvl+1);
-			array_push($arr, $s);
-		}
-		$text .= implode(",\n", $arr);
-		if (count($arr) == 1){
-			$text .= "\n";
+		if (count($ph->chs) > 0){
+			$arr = array();
+			for ($i=0;$i<count($ph->chs);$i++){
+				$s = $this->JSLanguagePhraseToText($ph->chs[$i], $lvl+1);
+				array_push($arr, $s);
+			}
+			$text .= implode(",\n", $arr)."\n";
 		}
 		
 		$text .= $t."}\n";
@@ -182,7 +188,7 @@ Brick.mod.localize.tempDataVs['".$module."'] = lngVs;
 
 	public function JSComponentLanguageSave($module, $component, $lngid, $phrase){
 		$text = "Brick.util.Language.add('".$lngid."',{'mod': {'{C#MODNAME}':{\n";
-		
+
 		if (is_array($phrase->chs)){
 			$arr = array();
 			for ($i=0;$i<count($phrase->chs);$i++){
@@ -193,6 +199,8 @@ Brick.mod.localize.tempDataVs['".$module."'] = lngVs;
 		}
 		
 		$text .= "}}});";
+		$text = str_replace("\n\n", "\n", $text);
+		$text = str_replace("}\n,", "},", $text);
 		
 		$dir = $this->BuildJSLanguageDirPath($module);
 		if (!is_dir($dir)){
@@ -288,6 +296,10 @@ Brick.mod.localize.tempDataVs['".$module."'] = lngVs;
 	
 	private function JSComponentTemplateSave($module, $component, $template){
 		$file = $this->BuildTemplateFileName($module, $component);
+		if (empty($template) && !file_exists($file)){
+			return true;
+		}
+			
 		$hdl = @fopen($file, 'wb');
 		
 		if (empty($hdl)){ return false; }
