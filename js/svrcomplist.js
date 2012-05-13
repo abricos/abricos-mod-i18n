@@ -7,7 +7,7 @@
 
 var Component = new Brick.Component();
 Component.requires = { 
-	mod:[
+	comp:[
         {name: '{C#MODNAME}', files: ['lib.js']}
 	]		
 };
@@ -19,8 +19,7 @@ Component.entryPoint = function(NS){
 
 	var CE = YAHOO.util.CustomEvent;
 	
-	var LNG = this.language,
-		buildTemplate = this.buildTemplate;
+	var buildTemplate = this.buildTemplate;
 
 	var elChildForeach = function(el, callback){
 		NS.life(callback, el);
@@ -31,13 +30,13 @@ Component.entryPoint = function(NS){
 		}
 	};
 
-	var ModuleRowWidget = function(container, module, cfg){
+	var SrvComponentRowWidget = function(container, component, cfg){
 		cfg = cfg || {};
-		this.init(container, module, cfg);
+		this.init(container, component, cfg);
 	};
-	ModuleRowWidget.prototype = {
-		init: function(container, mod, cfg){
-			this.module = mod;
+	SrvComponentRowWidget.prototype = {
+		init: function(container, comp, cfg){
+			this.component = comp;
 			this.selected = false;
 			this.cfg = cfg;
 			
@@ -45,7 +44,7 @@ Component.entryPoint = function(NS){
 				div = document.createElement('div');
 
 			div.innerHTML = TM.replace('row', {
-				'id': mod.id
+				'id': comp.id
 			});
 			container.appendChild(div.childNodes[0]);
 			
@@ -56,6 +55,8 @@ Component.entryPoint = function(NS){
 			el.parentNode.removeChild(el);
 		},
 		onClick: function(el){
+			var tp = this._TId['row'];
+			
 			var TM = this._TM, findClick = false;
 			
 			elChildForeach(TM.getEl('row.id'), function(fel){
@@ -67,9 +68,10 @@ Component.entryPoint = function(NS){
 			return false;
 		},
 		render: function(){
-			var TM = this._TM, gel = function(n){return TM.getEl('row.'+n);};
-				mod = this.module;
-			gel('tl').innerHTML = mod.name;
+			var TM = this._TM, 
+				gel = function(n){return TM.getEl('row.'+n);},
+				comp = this.component;
+			gel('tl').innerHTML = comp.name;
 		},
 		onSelectByClick: function(){
 			NS.life(this.cfg['onSelCallback'], this);
@@ -91,15 +93,14 @@ Component.entryPoint = function(NS){
 			}
 		}
 	};
-	NS.ModuleRowWidget = ModuleRowWidget;
+	NS.SrvComponentRowWidget = SrvComponentRowWidget;
 	
-	var ModuleListWidget = function(container){
-		this.init(container);
+	var SrvComponentListWidget = function(container, module){
+		this.init(container, module);
 	};
-	ModuleListWidget.prototype = {
-		init: function(container){
-
-			this.selectedModule = null;
+	SrvComponentListWidget.prototype = {
+		init: function(container, module){
+			this.selectedJSComponent = null;
 			this.selectChangedEvent = new CE('selectChangedEvent');
 			this.ws = [];
 
@@ -107,15 +108,11 @@ Component.entryPoint = function(NS){
 			container.innerHTML = TM.replace('widget');
 
 			var __self = this;
-
-			NS.localizeManager.modules.foreach(function(mod){
-				__self.renderModule(mod);
-			});
-
 			E.on(container, 'click', function(e){
                 var el = E.getTarget(e);
                 if (__self.onClick(el)){ E.preventDefault(e); }
             });
+			this.setModule(module);
 		},
 		destroy: function(){
 			this.clearws();
@@ -134,35 +131,33 @@ Component.entryPoint = function(NS){
 			}
 			return false;
 		},
-		selectModule: function(module){
-			this.selectModuleById(module.id);
+		selectJSComponent: function(component){
+			this.selectJSComponentById(component.id);
 		},
-		selectModuleById: function(moduleid){
+		selectJSComponentById: function(componentid){
 			var reta = null;
 			for (var i=0;i<this.ws.length;i++){
 				var w = this.ws[i];
-				if (w.module.id == moduleid){
-					reta = w.module;
+				if (w.component.id == componentid){
+					reta = w.component;
 					w.select();
 				}else{
 					w.unSelect();
 				}
 			}
-			this.selectedModule = reta;
-			this.onSelectModule(reta);
+			this.selectedJSComponent = reta;
+			this.onSelectJSComponent(reta);
 			return reta;
 		},
-		onSelectModule: function(module){
-			this.selectChangedEvent.fire(module);
+		onSelectJSComponent: function(comp){
+			this.selectChangedEvent.fire(comp);
 		},
 		onSelectByClick: function(row){
-			// this.selectModule(row.module);
-			var uri = NS.navigator.module.view(row.module.id);
-			Brick.Page.reload(uri);
+			this.selectJSComponent(row.component)
 		},
-		renderModule: function(mod){
+		renderJSComponent: function(comp){
 			var __self = this,
-				w = new NS.ModuleRowWidget(this._TM.getEl('widget.list'), mod, {
+				w = new NS.SrvComponentRowWidget(this._TM.getEl('widget.list'), comp, {
 					'onSelCallback': function(row){
 						__self.onSelectByClick(row);
 					}
@@ -170,8 +165,18 @@ Component.entryPoint = function(NS){
 			);
 			this.ws[this.ws.length] = w;
 			return w;
+		},
+		setModule: function(mod){
+			this.clearws();
+			
+			var TM = this._TM, __self = this;
+			TM.getEl('widget.mtl').innerHTML = mod.name;
+			
+			mod.jsComponents.foreach(function(comp){
+				__self.renderJSComponent(comp);
+			});
 		}
 	};
-	NS.ModuleListWidget = ModuleListWidget;
+	NS.SrvComponentListWidget = SrvComponentListWidget;
 
 };

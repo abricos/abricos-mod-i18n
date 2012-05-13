@@ -217,27 +217,19 @@ Component.entryPoint = function(NS){
 		}
 		return (maxid+1)+'';
 	};
-
-	var JSComponent = function(d){
-		d = L.merge({
-			'f': '',
-			'k': ''
-		}, d || {});
-		JSComponent.superclass.constructor.call(this, d);
+	
+	var Component = function(d){
+		d = d || {};
+		Component.superclass.constructor.call(this, d);
 	};
-	YAHOO.extend(JSComponent, NS.Item, {
+	YAHOO.extend(Component, NS.Item, {
 		init: function(d){
-			this.module = null;
 			
+			this.module = null;
 			this.phrases = {};
 			this.template = null;
 			
-			JSComponent.superclass.init.call(this, d);
-		},
-		update: function(d){
-			this.id = d['f'].replace('.js', '');
-			this.name = this.id;
-			this.key = d['k'];
+			Component.superclass.init.call(this, d);
 		},
 		setPhrases: function(lngid, ds, revs){
 			for (var fname in ds){
@@ -249,7 +241,7 @@ Component.entryPoint = function(NS){
 		getPhrases: function(lngid){
 			var ph = this.phrases[lngid];
 			if (!ph){
-				this.phrases[lngid] = ph  = new Phrase(lngid);
+				this.phrases[lngid] = ph = new Phrase(lngid);
 				ph.status = 'n';
 			}
 			return ph;
@@ -279,24 +271,6 @@ Component.entryPoint = function(NS){
 				ph = ch;
 			}
 			return ph;
-		},
-		loadTemplate: function(callback){
-			if (L.isString(this.template)){
-				NS.life(callback, this.template);
-				return;
-			}
-			
-			var __self = this;
-			NS.localizeManager.ajax({
-				'do': 'templatejs',
-				'module': this.module.name,
-				'component': this.name
-			}, function(d){
-				if (!L.isNull(d)){
-					__self._updateTemplate(d);
-				}
-				NS.life(callback, d);
-			});
 		},
 		_updateTemplate: function(text){
 			this.template = text;
@@ -330,14 +304,32 @@ Component.entryPoint = function(NS){
 				this.module._updateJSLangData(d['language']['text']);
 			}
 		},
-		saveChanges: function(callback){
+		_loadTemplateMethod: function(act, callback){
+			if (L.isString(this.template)){
+				NS.life(callback, this.template);
+				return;
+			}
+			
+			var __self = this;
+			NS.localizeManager.ajax({
+				'do': act,
+				'module': this.module.name,
+				'component': this.name
+			}, function(d){
+				if (!L.isNull(d)){
+					__self._updateTemplate(d);
+				}
+				NS.life(callback, d);
+			});
+		},
+		_saveChangesMethod: function(act, callback){
 			var lngs = {};
 			for (var n in this.phrases){
 				lngs[n] = this.phrases[n].getSaveData();
 			}
 			
 			var sd = {
-				'do': 'jscompsave',
+				'do': act,
 				'module': this.module.name,
 				'component': this.name,
 				'template': this.template,
@@ -350,10 +342,10 @@ Component.entryPoint = function(NS){
 				NS.life(callback, d);
 			});
 		},
-		revertChanges: function(callback){
+		_revertChangesMethod: function(act, callback){
 			var __self = this;
 			var sd = {
-				'do': 'jscompload',
+				'do': act,
 				'module': this.module.name,
 				'component': this.name
 			};
@@ -364,14 +356,39 @@ Component.entryPoint = function(NS){
 			});
 		}
 	});
+	NS.Component = Component;
+	
+	var JSComponent = function(d){
+		d = L.merge({
+			'f': '',
+			'k': ''
+		}, d || {});
+		JSComponent.superclass.constructor.call(this, d);
+	};
+	YAHOO.extend(JSComponent, Component, {
+		update: function(d){
+			this.id = d['f'].replace('.js', '');
+			this.name = this.id;
+			this.key = d['k'];
+		},
+		loadTemplate: function(callback){
+			this._loadTemplateMethod('templatejs', callback);
+		},
+		saveChanges: function(callback){
+			this._saveChangesMethod('jscompsave', callback);
+		},
+		revertChanges: function(callback){
+			this._revertChangesMethod('jscompload', callback);
+		}
+	});
 	NS.JSComponent = JSComponent;
 
-	var JSComponentList = function(d){
-		JSComponentList.superclass.constructor.call(this, d);
+	var ComponentList = function(d){
+		ComponentList.superclass.constructor.call(this, d);
 	};
-	YAHOO.extend(JSComponentList, NS.ItemList, {});
-	NS.JSComponentList = JSComponentList;
-
+	YAHOO.extend(ComponentList, NS.ItemList, {});
+	NS.ComponentList = ComponentList;
+	NS.JSComponentList = ComponentList;
 	
 	var Module = function(d){
 		d = L.merge({
@@ -381,7 +398,7 @@ Component.entryPoint = function(NS){
 	};
 	YAHOO.extend(Module, NS.Item, {
 		init: function(d){
-			this.jsComponents = new JSComponentList();
+			this.jsComponents = new ComponentList();
 			
 			this.langs = {
 				'ru': 'ru',
@@ -397,7 +414,7 @@ Component.entryPoint = function(NS){
 			var __self = this;
 			
 			NS.localizeManager.ajax({
-				'do': 'languagejs',
+				'do': 'jslanguage',
 				'module': this.name
 			}, function(d){
 				if (!L.isNull(d)){

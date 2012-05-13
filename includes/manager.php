@@ -3,7 +3,6 @@
  * @version $Id$
  * @package Abricos
  * @subpackage Localize
- * @copyright Copyright (C) 2012 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin (roosit@Abricos.org)
  */
@@ -45,7 +44,7 @@ class LocalizeManager extends Ab_ModuleManager {
 	public function AJAX($d){
 		switch($d->do){
 			case 'init': return $this->BoardData();
-			case 'languagejs': return $this->ModuleJSLanguage($d->module);
+			case 'jslanguage': return $this->ModuleJSLanguage($d->module);
 			case 'templatejs': return $this->JSComponentTemplate($d->module, $d->component);
 			case 'jscompsave': return $this->JSComponentSave($d->module, $d->component, $d->template, $d->language);
 			case 'jscompload': return $this->JSComponentLoad($d->module, $d->component);

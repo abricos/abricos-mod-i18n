@@ -8,7 +8,7 @@
 var Component = new Brick.Component();
 Component.requires = { 
 	mod:[
-        {name: '{C#MODNAME}', files: ['jscomplist.js', 'jscompview.js']}
+        {name: '{C#MODNAME}', files: ['svrcomplist.js','jscomplist.js', 'jscompview.js']}
 	]		
 };
 Component.entryPoint = function(NS){
@@ -19,22 +19,26 @@ Component.entryPoint = function(NS){
 	
 	var buildTemplate = this.buildTemplate;
 	
-	var ModuleViewWidget = function(container, mod){
-		this.init(container, mod);
+	var ModuleViewWidget = function(container, modid){
+		this.init(container, modid);
 	};
 	ModuleViewWidget.prototype = {
-		init: function(container, mod){
+		init: function(container, modid){
 			var TM = buildTemplate(this, 'widget');
 			container.innerHTML = TM.replace('widget');
 			
-			this.jsCompListWidget = null;
-			this.jsCompViewWidget = null;
+			this.clnCompListWidget = null;
+			this.srvCompListWidget = null;
+			
+			this.viewWidget = null;
+
+			var mod = NS.localizeManager.modules.get(modid);
 
 			this.setModule(mod);
 		},
 		destroy: function(){
-			if (!L.isNull(this.jsCompListWidget)){
-				this.jsCompListWidget.destroy();
+			if (!L.isNull(this.clnCompListWidget)){
+				this.clnCompListWidget.destroy();
 			}
 			var el = this._TM.getEl('widget.id');
 			el.parentNode.removeChild(el);
@@ -54,6 +58,8 @@ Component.entryPoint = function(NS){
 			
 			hide('empty'); show('loading'); hide('wcont');
 			
+			gel('mname').innerHTML = mod.id;
+			
 			var __self = this;
 			mod.reloadLanguageData(function(){
 				__self._onLoadModuleData();
@@ -64,29 +70,21 @@ Component.entryPoint = function(NS){
 			var mod = this.module;
 			var TM = this._TM, gel = function(n){ return TM.getEl('widget.'+n);};
 			
-			if (!L.isNull(this.jsCompListWidget)){
-				this.jsCompListWidget.destroy();
-				this.jsCompListWidget.selectChangedEvent.unsubscribe(this.onJSComponentSelectChanged);
+			if (!L.isNull(this.clnCompListWidget)){
+				this.clnCompListWidget.destroy();
+				this.clnCompListWidget.selectChangedEvent.unsubscribe(this.onJSComponentSelectChanged);
 			}
 
-			this.jsCompListWidget = new NS.JSComponentListWidget(gel('jscplist'), mod);
-			this.jsCompListWidget.selectChangedEvent.subscribe(this.onJSComponentSelectChanged, this, true);
+			this.clnCompListWidget = new NS.JSComponentListWidget(gel('jscplist'), mod);
+			this.clnCompListWidget.selectChangedEvent.subscribe(this.onJSComponentSelectChanged, this, true);
 			
-			var comp = mod.jsComponents.getByIndex(0);
-			
-			if (L.isNull(this.jsCompViewWidget)){
-				this.jsCompViewWidget = new NS.JSComponentViewWidget(gel('jscpview'), comp);
-			}
-
-			if (L.isNull(comp)){
-				this.jsCompViewWidget.setComponent(comp);
-			}else{
-				// потому что событие потом вызовет this.onJSComponentSelectChanged;
-				this.jsCompListWidget.selectJSComponent(comp);
-			}
+			this.svrCompListWidget = new NS.SrvComponentListWidget(gel('srvcplist'), mod);
 		},
 		onJSComponentSelectChanged: function(evt, prm){
-			this.jsCompViewWidget.setComponent(prm[0]);
+			if (L.isNull(this.viewWidget)){
+				this.viewWidget = new NS.JSComponentViewWidget(this._TM.getEl('widget.jscpview'));
+			}
+			this.viewWidget.setComponent(prm[0]);
 		}
 	};
 	NS.ModuleViewWidget = ModuleViewWidget;

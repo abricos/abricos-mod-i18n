@@ -19,8 +19,7 @@ Component.entryPoint = function(NS){
 
 	var CE = YAHOO.util.CustomEvent;
 	
-	var LNG = this.language,
-		buildTemplate = this.buildTemplate;
+	var buildTemplate = this.buildTemplate;
 
 	var elChildForeach = function(el, callback){
 		NS.life(callback, el);
@@ -69,7 +68,8 @@ Component.entryPoint = function(NS){
 			return false;
 		},
 		render: function(){
-			var TM = this._TM, gel = function(n){return TM.getEl('row.'+n);};
+			var TM = this._TM, 
+				gel = function(n){return TM.getEl('row.'+n);},
 				comp = this.component;
 			gel('tl').innerHTML = comp.name;
 		},

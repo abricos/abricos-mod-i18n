@@ -21,7 +21,7 @@ Component.entryPoint = function(NS){
 	var buildTemplate = this.buildTemplate;
 	
 	var GMID = {
-		'ModuleWorkspaceWidget': 'modws',
+		'ModuleListWidget': 'modlist',
 		'AboutWidget': 'about'
 	};
 	GMIDI = {};
@@ -53,8 +53,8 @@ Component.entryPoint = function(NS){
 		destroy: function(){},
 		showPage: function(p){
 			p = L.merge({
-				'component': 'modws',
-				'wname': 'ModuleWorkspaceWidget',
+				'component': 'modlist',
+				'wname': 'ModuleListWidget',
 				'p1': '', 'p2': '', 'p3': ''
 			}, p || {});
 
@@ -120,8 +120,8 @@ Component.entryPoint = function(NS){
 	NS.API.ws = function(){
 		var args = arguments;
 		var pgInfo = {
-			'component': args[0] || 'modws',
-			'wname': args[1] || 'ModuleWorkspaceWidget',
+			'component': args[0] || 'modlist',
+			'wname': args[1] || 'ModuleListWidget',
 			'p1': args[2], 'p2': args[3], 'p3': args[4]
 		};
 		if (L.isNull(activeWSPanel) || activeWSPanel.isDestroy()){

@@ -41,7 +41,6 @@ Component.entryPoint = function(NS){
 			container.innerHTML += TM.replace('row', {
 				'tl': ti['n']
 			});
-			
 		},
 		load: function(){
 			var __self = this;
@@ -269,6 +268,7 @@ Component.entryPoint = function(NS){
 			this.foreach(function(w){
 				return w.onClick(el);
 			});
+			return false;
 		},
 		onKeyUp: function(el){
 			this.foreach(function(w){
