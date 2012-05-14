@@ -8,7 +8,7 @@
 var Component = new Brick.Component();
 Component.requires = { 
 	mod:[
-        {name: '{C#MODNAME}', files: ['svrcomplist.js','jscomplist.js', 'jscompview.js']}
+        {name: '{C#MODNAME}', files: ['svrcomplist.js','jscomplist.js', 'compview.js']}
 	]		
 };
 Component.entryPoint = function(NS){
@@ -71,18 +71,30 @@ Component.entryPoint = function(NS){
 			var TM = this._TM, gel = function(n){ return TM.getEl('widget.'+n);};
 			
 			if (!L.isNull(this.clnCompListWidget)){
-				this.clnCompListWidget.destroy();
 				this.clnCompListWidget.selectChangedEvent.unsubscribe(this.onJSComponentSelectChanged);
+				this.clnCompListWidget.destroy();
 			}
 
 			this.clnCompListWidget = new NS.JSComponentListWidget(gel('jscplist'), mod);
 			this.clnCompListWidget.selectChangedEvent.subscribe(this.onJSComponentSelectChanged, this, true);
-			
-			this.svrCompListWidget = new NS.SrvComponentListWidget(gel('srvcplist'), mod);
+
+			if (!L.isNull(this.srvCompListWidget)){
+				this.srvCompListWidget.selectChangedEvent.unsubscribe(this.onSrvComponentSelectChanged);
+				this.srvCompListWidget.destroy();
+			}
+
+			this.srvCompListWidget = new NS.SrvComponentListWidget(gel('srvcplist'), mod);
+			this.srvCompListWidget.selectChangedEvent.subscribe(this.onSrvComponentSelectChanged, this, true);
+		},
+		onSrvComponentSelectChanged: function(evt, prm){
+			if (L.isNull(this.viewWidget)){
+				this.viewWidget = new NS.ComponentViewWidget(this._TM.getEl('widget.jscpview'));
+			}
+			this.viewWidget.setComponent(prm[0]);
 		},
 		onJSComponentSelectChanged: function(evt, prm){
 			if (L.isNull(this.viewWidget)){
-				this.viewWidget = new NS.JSComponentViewWidget(this._TM.getEl('widget.jscpview'));
+				this.viewWidget = new NS.ComponentViewWidget(this._TM.getEl('widget.jscpview'));
 			}
 			this.viewWidget.setComponent(prm[0]);
 		}

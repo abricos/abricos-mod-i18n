@@ -100,7 +100,7 @@ Component.entryPoint = function(NS){
 	};
 	SrvComponentListWidget.prototype = {
 		init: function(container, module){
-			this.selectedJSComponent = null;
+			this.selectedSrvComponent = null;
 			this.selectChangedEvent = new CE('selectChangedEvent');
 			this.ws = [];
 
@@ -131,10 +131,10 @@ Component.entryPoint = function(NS){
 			}
 			return false;
 		},
-		selectJSComponent: function(component){
-			this.selectJSComponentById(component.id);
+		selectSrvComponent: function(component){
+			this.selectSrvComponentById(component.id);
 		},
-		selectJSComponentById: function(componentid){
+		selectSrvComponentById: function(componentid){
 			var reta = null;
 			for (var i=0;i<this.ws.length;i++){
 				var w = this.ws[i];
@@ -145,17 +145,17 @@ Component.entryPoint = function(NS){
 					w.unSelect();
 				}
 			}
-			this.selectedJSComponent = reta;
-			this.onSelectJSComponent(reta);
+			this.selectedSrvComponent = reta;
+			this.onSelectSrvComponent(reta);
 			return reta;
 		},
-		onSelectJSComponent: function(comp){
+		onSelectSrvComponent: function(comp){
 			this.selectChangedEvent.fire(comp);
 		},
 		onSelectByClick: function(row){
-			this.selectJSComponent(row.component)
+			this.selectSrvComponent(row.component)
 		},
-		renderJSComponent: function(comp){
+		renderSrvComponent: function(comp){
 			var __self = this,
 				w = new NS.SrvComponentRowWidget(this._TM.getEl('widget.list'), comp, {
 					'onSelCallback': function(row){
@@ -172,8 +172,8 @@ Component.entryPoint = function(NS){
 			var TM = this._TM, __self = this;
 			TM.getEl('widget.mtl').innerHTML = mod.name;
 			
-			mod.jsComponents.foreach(function(comp){
-				__self.renderJSComponent(comp);
+			mod.srvComponents.foreach(function(comp){
+				__self.renderSrvComponent(comp);
 			});
 		}
 	};

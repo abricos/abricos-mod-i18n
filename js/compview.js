@@ -19,19 +19,19 @@ Component.entryPoint = function(NS){
 	
 	var buildTemplate = this.buildTemplate;
 	
-	var JSComponentViewWidget = function(container, comp){
+	var ComponentViewWidget = function(container, comp){
 		comp = comp || null;
 		this.init(container, comp);
 	};
-	JSComponentViewWidget.prototype = {
+	ComponentViewWidget.prototype = {
 		init: function(container, comp){
 			this._minHeight = 30;
 			
 			var TM = buildTemplate(this, 'widget');
 			container.innerHTML = TM.replace('widget');
 			
-			this.jsTemplateViewWidget = null;
-			this.jsLanguageViewWidget = null;
+			this.tplViewWidget = null;
+			this.lngViewWidget = null;
 			
 			this.setComponent(comp);
 			
@@ -42,14 +42,14 @@ Component.entryPoint = function(NS){
             });
 		},
 		destroy: function(){
-			if (!L.isNull(this.jsTemplateViewWidget)){
-				this.jsTemplateViewWidget.createPhraseBySelectEvent.unsubscribe(this.onTemplateCreatePhraseBySelect);
-				this.jsTemplateViewWidget.templateTextChangeEvent.unsubscribe(this.onTemplateTextChange);
-				this.jsTemplateViewWidget.destroy();
+			if (!L.isNull(this.tplViewWidget)){
+				this.tplViewWidget.createPhraseBySelectEvent.unsubscribe(this.onTemplateCreatePhraseBySelect);
+				this.tplViewWidget.templateTextChangeEvent.unsubscribe(this.onTemplateTextChange);
+				this.tplViewWidget.destroy();
 				
-				this.jsLanguageViewWidget.phraseRemoveEvent.unsubscribe(this.onPhraseRemove);
-				this.jsLanguageViewWidget.phraseUpdateEvent.unsubscribe(this.onPhraseUpdate);
-				this.jsLanguageViewWidget.destroy();
+				this.lngViewWidget.phraseRemoveEvent.unsubscribe(this.onPhraseRemove);
+				this.lngViewWidget.phraseUpdateEvent.unsubscribe(this.onPhraseUpdate);
+				this.lngViewWidget.destroy();
 			}
 			var el = this._TM.getEl('widget.id');
 			el.parentNode.removeChild(el);
@@ -62,17 +62,17 @@ Component.entryPoint = function(NS){
 
 			gel('cmntl').innerHTML = !L.isNull(comp) ? comp.name : "";
 	
-			if (L.isNull(this.jsTemplateViewWidget)){
-				this.jsTemplateViewWidget = new NS.JSTemplateViewWidget(TM.getEl('widget.jstplview'), comp);
-				this.jsTemplateViewWidget.createPhraseBySelectEvent.subscribe(this.onTemplateCreatePhraseBySelect, this, true);
-				this.jsTemplateViewWidget.templateTextChangeEvent.subscribe(this.onTemplateTextChange, this, true);
+			if (L.isNull(this.tplViewWidget)){
+				this.tplViewWidget = new NS.JSTemplateViewWidget(TM.getEl('widget.jstplview'), comp);
+				this.tplViewWidget.createPhraseBySelectEvent.subscribe(this.onTemplateCreatePhraseBySelect, this, true);
+				this.tplViewWidget.templateTextChangeEvent.subscribe(this.onTemplateTextChange, this, true);
 				
-				this.jsLanguageViewWidget = new NS.JSLanguageViewWidget(TM.getEl('widget.jslngview'), comp);
-				this.jsLanguageViewWidget.phraseRemoveEvent.subscribe(this.onPhraseRemove, this, true);
-				this.jsLanguageViewWidget.phraseUpdateEvent.subscribe(this.onPhraseUpdate, this, true);
+				this.lngViewWidget = new NS.JSLanguageViewWidget(TM.getEl('widget.jslngview'), comp);
+				this.lngViewWidget.phraseRemoveEvent.subscribe(this.onPhraseRemove, this, true);
+				this.lngViewWidget.phraseUpdateEvent.subscribe(this.onPhraseUpdate, this, true);
 			}else{
-				this.jsTemplateViewWidget.setComponent(comp);
-				this.jsLanguageViewWidget.setComponent(comp);
+				this.tplViewWidget.setComponent(comp);
+				this.lngViewWidget.setComponent(comp);
 			}
 			this.updateSaveStatus();
 			
@@ -102,7 +102,7 @@ Component.entryPoint = function(NS){
 				ti = di['titem'],
 				path = comp.name+'.'+ti['n'];
 			
-			var lng = this.jsLanguageViewWidget.lngSelWidget.getValue(),
+			var lng = this.lngViewWidget.lngSelWidget.getValue(),
 				ph = comp.findPhrase(lng, path);
 
 			if (L.isNull(ph)){
@@ -116,13 +116,13 @@ Component.entryPoint = function(NS){
 			var tpPhId = phrase.getTemplateId(comp.module.name);
 			di['wrow'].replaceSelPhraseInEditor(tpPhId);
 			
-			this.jsTemplateViewWidget.applyChanges();
+			this.tplViewWidget.applyChanges();
 			
-			this.jsLanguageViewWidget.render();
+			this.lngViewWidget.render();
 			this.updateSaveStatus();
 		},
 		onTemplateTextChange: function(){
-			this.jsTemplateViewWidget.applyChanges();
+			this.tplViewWidget.applyChanges();
 			this.updateSaveStatus();
 		},
 		onPhraseRemove: function(){
@@ -140,7 +140,7 @@ Component.entryPoint = function(NS){
 			return false;
 		},
 		saveChanged: function(){
-			this.jsTemplateViewWidget.applyChanges();
+			this.tplViewWidget.applyChanges();
 			var __self = this;
 			this.component.saveChanges(function(){
 				__self.updateSaveStatus();
@@ -154,6 +154,6 @@ Component.entryPoint = function(NS){
 		}
 	};
 	
-	NS.JSComponentViewWidget = JSComponentViewWidget;
+	NS.ComponentViewWidget = ComponentViewWidget;
 
 };

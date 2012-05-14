@@ -44,8 +44,9 @@ class LocalizeManager extends Ab_ModuleManager {
 	public function AJAX($d){
 		switch($d->do){
 			case 'init': return $this->BoardData();
-			case 'jslanguage': return $this->ModuleJSLanguage($d->module);
-			case 'templatejs': return $this->JSComponentTemplate($d->module, $d->component);
+			case 'language': return $this->ModuleLanguage($d->module);
+			case 'srvtemplate': return $this->SrvComponentTemplate($d->module, $d->component, $d->type);
+			case 'jstemplate': return $this->JSComponentTemplate($d->module, $d->component);
 			case 'jscompsave': return $this->JSComponentSave($d->module, $d->component, $d->template, $d->language);
 			case 'jscompload': return $this->JSComponentLoad($d->module, $d->component);
 		}
@@ -77,7 +78,76 @@ class LocalizeManager extends Ab_ModuleManager {
 		
 		$text = file_get_contents(CWD."/modules/localize/langs.txt");
 		$ret->langs = $text;
+		$ret->srv = $this->BrickList();
 		
+		return $ret;
+	}
+	
+	public function BrickList(){
+		if (!$this->IsAdminRole()){ return null; }
+		
+
+		$ret = array();
+		
+		Abricos::$instance->modules->RegisterAllModule();
+		$mods = CMSRegistry::$instance->modules->GetModules();
+		
+		foreach ($mods as $modname => $module){
+			
+			$arr = array();
+			
+			$files = globa(CWD."/modules/".$modname."/brick/*.html");
+			foreach ($files as $file){
+					
+				$fi = pathinfo($file);
+				
+				$bk = new stdClass();
+				$bk->nm = $fi['filename'];
+				$bk->tp = 'b';
+				array_push($arr, $bk);
+			}
+			
+			$files = globa(CWD."/modules/".$modname."/content/*.html");
+			foreach ($files as $file){
+					
+				$fi = pathinfo($file);
+			
+				$bk = new stdClass();
+				$bk->nm = $fi['filename'];
+				$bk->tp = 'c';
+				array_push($arr, $bk);
+			}
+			
+			$ret[$modname] = $arr;
+		}
+		return $ret;
+	}
+	
+	public function ModuleLanguage($module, $component = ''){
+		if (!$this->IsAdminRole()){ return null; }
+		
+		$ret = new stdClass();
+		$ret->srv = $this->ModuleSrvLanguage($module);
+		$ret->js = $this->ModuleJSLanguage($module, $component);
+		
+		return $ret;
+	}
+	
+	public function ModuleSrvLanguage($module){
+		if (!$this->IsAdminRole()){ return null; }
+		
+		$ret = array();
+		$lngfiles = globa(CWD."/modules/".$module."/language/??.php");
+		foreach ($lngfiles as $lngfile){
+			$fi = pathinfo($lngfile);
+			
+			$lngid = $fi['filename'];
+			
+			$arr = include($lngfile);
+			if (is_array($arr)){
+				$ret[$lngid] = $arr;
+			}
+		}
 		return $ret;
 	}
 	
@@ -234,7 +304,28 @@ Brick.mod.localize.tempDataVs['".$module."'] = lngVs;
 		return true;
 	}
 	
-	private function BuildTemplateFileName($module, $component){
+	private function SrvBuildTemplateFileName($module, $component, $type){
+		$module = str_replace("..", "", $module);
+		$component = str_replace("..", "", $component);
+		$type = str_replace("..", "", $type);
+		return CWD."/modules/".$module."/".$type."/".$component.".html";
+	}
+	
+	
+	public function SrvComponentTemplate($module, $component, $type){
+		if (!$this->IsAdminRole()){
+			return null;
+		}
+		$file = $this->SrvBuildTemplateFileName($module, $component, $type);
+		
+		if (!file_exists($file)){
+			return "";
+		}
+		
+		return @file_get_contents($file);
+	}
+	
+	private function JSBuildTemplateFileName($module, $component){
 		$module = str_replace("..", "", $module);
 		$component = str_replace("..", "", $component);
 		return CWD."/modules/".$module."/js/".$component.".htm";
@@ -245,7 +336,7 @@ Brick.mod.localize.tempDataVs['".$module."'] = lngVs;
 			return null;
 		}
 	
-		$file = $this->BuildTemplateFileName($module, $component);
+		$file = $this->JSBuildTemplateFileName($module, $component);
 	
 		if (!file_exists($file)){
 			return "";
@@ -294,7 +385,7 @@ Brick.mod.localize.tempDataVs['".$module."'] = lngVs;
 	}
 	
 	private function JSComponentTemplateSave($module, $component, $template){
-		$file = $this->BuildTemplateFileName($module, $component);
+		$file = $this->JSBuildTemplateFileName($module, $component);
 		if (empty($template) && !file_exists($file)){
 			return true;
 		}

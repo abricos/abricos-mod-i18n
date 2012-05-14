@@ -304,18 +304,19 @@ Component.entryPoint = function(NS){
 				this.module._updateJSLangData(d['language']['text']);
 			}
 		},
-		_loadTemplateMethod: function(act, callback){
+		_loadTemplateMethod: function(odo, callback){
 			if (L.isString(this.template)){
 				NS.life(callback, this.template);
 				return;
 			}
 			
-			var __self = this;
-			NS.localizeManager.ajax({
-				'do': act,
+			odo = L.merge({
 				'module': this.module.name,
 				'component': this.name
-			}, function(d){
+			}, odo || {}); 
+			
+			var __self = this;
+			NS.localizeManager.ajax(odo, function(d){
 				if (!L.isNull(d)){
 					__self._updateTemplate(d);
 				}
@@ -367,12 +368,15 @@ Component.entryPoint = function(NS){
 	};
 	YAHOO.extend(JSComponent, Component, {
 		update: function(d){
-			this.id = d['f'].replace('.js', '');
-			this.name = this.id;
+			this.id = this.name = d['f'].replace('.js', '');
 			this.key = d['k'];
+			
+			this.type = "js";
 		},
 		loadTemplate: function(callback){
-			this._loadTemplateMethod('templatejs', callback);
+			this._loadTemplateMethod({
+				'do': 'jstemplate'
+			}, callback);
 		},
 		saveChanges: function(callback){
 			this._saveChangesMethod('jscompsave', callback);
@@ -382,7 +386,35 @@ Component.entryPoint = function(NS){
 		}
 	});
 	NS.JSComponent = JSComponent;
+	
+	var SrvComponent = function(d){
+		d = L.merge({
+			'nm': '',
+			'tp': ''
+		}, d || {});
+		SrvComponent.superclass.constructor.call(this, d);
+	};
+	YAHOO.extend(SrvComponent, Component, {
+		update: function(d){
+			this.id = this.name = d['nm'];
+			this.type = d['tp'] == 'b' ? 'brick' : 'content';
+		},
+		loadTemplate: function(callback){
+			this._loadTemplateMethod({
+				'do': 'srvtemplate',
+				'type': this.type
+			}, callback);
+		},
+		saveChanges: function(callback){
+			this._saveChangesMethod('srvcompsave', callback);
+		},
+		revertChanges: function(callback){
+			this._revertChangesMethod('srvcompload', callback);
+		}
+	});
+	NS.SrvComponent = SrvComponent;
 
+	
 	var ComponentList = function(d){
 		ComponentList.superclass.constructor.call(this, d);
 	};
@@ -398,13 +430,14 @@ Component.entryPoint = function(NS){
 	};
 	YAHOO.extend(Module, NS.Item, {
 		init: function(d){
+			
+			this.srvComponents = new ComponentList();
 			this.jsComponents = new ComponentList();
 			
 			this.langs = {
 				'ru': 'ru',
 				'en': 'en'
 			};
-			
 			Module.superclass.init.call(this, d);
 		},
 		update: function(d){
@@ -414,14 +447,18 @@ Component.entryPoint = function(NS){
 			var __self = this;
 			
 			NS.localizeManager.ajax({
-				'do': 'jslanguage',
+				'do': 'language',
 				'module': this.name
 			}, function(d){
 				if (!L.isNull(d)){
-					__self._updateJSLangData(d);
+					__self._updateSrvLangData(d['srv']);
+					__self._updateJSLangData(d['js']);
 				}
 				NS.life(callback);
 			});
+		},
+		_updateSrvLangData: function(d){
+			
 		},
 		_updateJSLangData: function(jsScript){
 			NS.tempData = null;
@@ -479,7 +516,6 @@ Component.entryPoint = function(NS){
 					NS.life(callback, __self);
 				});
 			});
-			
 		},
 		ajax: function(data, callback){
 			data = data || {};
@@ -506,8 +542,8 @@ Component.entryPoint = function(NS){
 			for (var n in ms){
 				var mod = new Module({'id': n, 'nm': n});
 				
-				for (var i=0,comp;i<ms[n].length;i++){
-					comp = new JSComponent(ms[n][i]);
+				for (var i=0;i<ms[n].length;i++){
+					var comp = new JSComponent(ms[n][i]);
 					comp.module = mod;
 					mod.jsComponents.add(comp);
 				}
@@ -521,6 +557,21 @@ Component.entryPoint = function(NS){
 			});
 			for (var i=0;i<list.length;i++){
 				this.modules.add(list[i]);
+			}
+			
+			// серверные компоненты
+			for (var n in d['srv']){
+				var mod = this.modules.get(n);
+				if (L.isNull(mod)){
+					mod = new Module({'id': n, 'nm': n});
+				}
+				var mis = d['srv'][n];
+				for (var i=0;i<mis.length;i++){
+					
+					var comp = new SrvComponent(mis[i]);
+					comp.module = mod;
+					mod.srvComponents.add(comp);
+				}
 			}
 		}
 	};

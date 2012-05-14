@@ -118,11 +118,11 @@ Component.entryPoint = function(NS){
 		render: function(){
 			var TM = this._TM, gel = function(n){ return TM.getEl('row.'+n);};
 			var ti = this.titem;
-			TM.getEl('row.vresult').innerHTML = escp(ti['t']);
-			TM.getEl('row.vsource').innerHTML = escp(ti['t']);
-			TM.getEl('row.editor').value = ti['t'];
+			gel('vresult').innerHTML = escp(ti['t']);
+			gel('vsource').innerHTML = escp(ti['t']);
+			gel('editor').value = ti['t'];
 			
-			this._checkText = TM.getEl('row.editor').value;
+			this._checkText = gel('editor').value;
 		},
 		createPhraseBySelected: function(){
 			var sText = NS.getSelectionTextArea(this._TM.getEl('row.editor'));
@@ -213,34 +213,39 @@ Component.entryPoint = function(NS){
 			});
 		},
 		setTemplate: function(t){
-			var TM = this._TM,
-				exp = new RegExp("<!--{([a-zA-Z0-9_\s]+)}-->", "g"),
-				arr = t.match(exp);
-			
-			var ta = []
-			if (L.isArray(arr)){
-				var st = t;
-				for (var i=arr.length-1;i>=0;i--){
-					
-					var tn = arr[i], sa = st.split(tn);
-					st = sa[0]
-					var t = sa[1].replace(tn, '');
-					
-					t = t.replace(/\r\n/g, '\n');
-					t = t.replace(/\r/g, '\n');
-					
-					t = t.replace(/^\n*/, '');
-					t = t.replace(/\n*$/, '');
-					
-					ta[ta.length] = {
-						'n': tn.replace('<!--{', '').replace('}-->', ''),
-						't': t
-					};
+			this.clearWS();
+			var ta = [];
+
+			if (this.component.type != 'js'){
+				ta[ta.length] = {'n': '', 't': t};
+			}else {
+				
+				var exp = new RegExp("<!--{([a-zA-Z0-9_\s]+)}-->", "g"),
+					arr = t.match(exp);
+				
+				if (L.isArray(arr)){
+					var st = t;
+					for (var i=arr.length-1;i>=0;i--){
+						
+						var tn = arr[i], sa = st.split(tn);
+						st = sa[0];
+						var t = sa[1].replace(tn, '');
+						
+						t = t.replace(/\r\n/g, '\n');
+						t = t.replace(/\r/g, '\n');
+						
+						t = t.replace(/^\n*/, '');
+						t = t.replace(/\n*$/, '');
+						
+						ta[ta.length] = {
+							'n': tn.replace('<!--{', '').replace('}-->', ''),
+							't': t
+						};
+					}
+					ta = ta.reverse();
 				}
-				ta = ta.reverse();
 			}
 			
-			this.clearWS();
 			var ws = this.ws;
 			for (var i=0;i<ta.length;i++){
 				ws[ws.length] = new JSTemplateViewRowWidget(this,
