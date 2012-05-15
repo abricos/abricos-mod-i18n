@@ -46,9 +46,12 @@ class LocalizeManager extends Ab_ModuleManager {
 			case 'init': return $this->BoardData();
 			case 'language': return $this->ModuleLanguage($d->module);
 			case 'srvtemplate': return $this->SrvComponentTemplate($d->module, $d->component, $d->type);
+			case 'srvcompsave': return $this->SrvComponentSave($d->module, $d->component, $d->type, $d->template, $d->language);
+			case 'srvcompload': return $this->SrvComponentLoad($d->module, $d->component, $d->type);
+			
 			case 'jstemplate': return $this->JSComponentTemplate($d->module, $d->component);
-			case 'jscompsave': return $this->JSComponentSave($d->module, $d->component, $d->template, $d->language);
-			case 'jscompload': return $this->JSComponentLoad($d->module, $d->component);
+			case 'jscompsave': return $this->JSComponentSave($d->module, $d->component, $d->type, $d->template, $d->language);
+			case 'jscompload': return $this->JSComponentLoad($d->module, $d->component, $d->type);
 		}
 		return null;
 	}
@@ -293,36 +296,17 @@ Brick.mod.localize.tempDataVs['".$module."'] = lngVs;
 	}
 	
 	public function JSComponentLanguagesSave($module, $component, $languages){
-		
 		foreach($languages as $lang => $phrases){
 			$isok = $this->JSComponentLanguageSave($module, $component, $lang, $phrases);
 			if (!$isok){
 				return false;
 			}
 		}
-		
 		return true;
 	}
 	
-	private function SrvBuildTemplateFileName($module, $component, $type){
-		$module = str_replace("..", "", $module);
-		$component = str_replace("..", "", $component);
-		$type = str_replace("..", "", $type);
-		return CWD."/modules/".$module."/".$type."/".$component.".html";
-	}
+	public function SrvComponentLoad($module, $component, $type){
 	
-	
-	public function SrvComponentTemplate($module, $component, $type){
-		if (!$this->IsAdminRole()){
-			return null;
-		}
-		$file = $this->SrvBuildTemplateFileName($module, $component, $type);
-		
-		if (!file_exists($file)){
-			return "";
-		}
-		
-		return @file_get_contents($file);
 	}
 	
 	private function JSBuildTemplateFileName($module, $component){
@@ -345,40 +329,42 @@ Brick.mod.localize.tempDataVs['".$module."'] = lngVs;
 		return @file_get_contents($file);
 	}
 	
-	public function JSComponentSave($module, $component, $template, $languages){
-		if (!$this->IsAdminRole()){ return null; }
-		
+	public function JSComponentSave($module, $component, $type, $template, $languages){
+		if (!$this->IsAdminRole()){
+			return null;
+		}
+	
 		$ret = new stdClass();
 		$lng = new stdClass();
 		$tpl = new stdClass();
-		
+	
 		$lng->error = !$this->JSComponentLanguagesSave($module, $component, $languages);
 		if ($lng->error){
 			return $ret;
 		}
 		$lng->text = $this->ModuleJSLanguage($module, $component);
-		
+	
 		$tpl->error = !$this->JSComponentTemplateSave($module, $component, $template);
 		if (!$tpl->error){
 			$tpl->text = $this->JSComponentTemplate($module, $component);
 		}
-		
+	
 		$ret->template = $tpl;
 		$ret->language = $lng;
 		return $ret;
 	}
 	
-	public function JSComponentLoad($module, $component){
+	public function JSComponentLoad($module, $component, $type){
 		$ret = new stdClass();
-		
+	
 		$lng = new stdClass();
 		$lng->error = false;
 		$lng->text = $this->ModuleJSLanguage($module, $component);
-		
+	
 		$tpl = new stdClass();
 		$tpl->error = false;
 		$tpl->text = $this->JSComponentTemplate($module, $component);
-		
+	
 		$ret->template = $tpl;
 		$ret->language = $lng;
 		return $ret;
@@ -391,8 +377,129 @@ Brick.mod.localize.tempDataVs['".$module."'] = lngVs;
 		}
 			
 		$hdl = @fopen($file, 'wb');
+	
+		if (empty($hdl)){
+			return false;
+		}
+	
+		$len = fwrite($hdl, $template);
+		fclose($hdl);
+	
+		return $len>0;
+	}
 		
-		if (empty($hdl)){ return false; }
+	private function SrvBuildTemplateFileName($module, $component, $type){
+		$module = str_replace("..", "", $module);
+		$component = str_replace("..", "", $component);
+		$type = str_replace("..", "", $type);
+		return CWD."/modules/".$module."/".$type."/".$component.".html";
+	}
+	
+	
+	public function SrvComponentTemplate($module, $component, $type){
+		if (!$this->IsAdminRole()){
+			return null;
+		}
+		$file = $this->SrvBuildTemplateFileName($module, $component, $type);
+		
+		if (!file_exists($file)){
+			return "";
+		}
+		
+		return @file_get_contents($file);
+	}
+	
+	private function SrvLanguagePhraseToText($ph, $lvl){
+		$t = str_repeat("\t", $lvl);
+		if (!is_array($ph->chs)){
+			$s = addslashes($ph->tl);
+			$s = str_replace("\n", "\\n", $s);
+			$s = str_replace("\r", "\\r", $s);
+			return $t."'".$ph->id."'=> '".$s."'";
+		}
+		$text = $t."'".$ph->id."' => array(\n";
+	
+		if (count($ph->chs) > 0){
+			$arr = array();
+			for ($i=0;$i<count($ph->chs);$i++){
+				$s = $this->SrvLanguagePhraseToText($ph->chs[$i], $lvl+1);
+				array_push($arr, $s);
+			}
+			$text .= implode(",\n", $arr)."\n";
+		}
+	
+		$text .= $t.")\n";
+	
+		return $text;
+	}
+	
+	public function SrvComponentLanguageSave($module, $component, $lngid, $phrase){
+		$text = "<?php\n";
+		$text .= "return array(\n";
+		
+		
+		if (is_array($phrase->chs)){
+			$arr = array();
+			for ($i=0;$i<count($phrase->chs);$i++){
+				$s = $this->SrvLanguagePhraseToText($phrase->chs[$i], 1);
+				array_push($arr, $s);
+			}
+			$text .= implode(",\n", $arr);
+		}
+		
+		$text .= ");\n";
+		$text .= "?>";
+
+		$module = str_replace("..", "", $module);
+		$lngid = str_replace("..", "", $lngid);
+		
+		
+		$dir =  CWD."/modules/".$module."/language";
+		if (!is_dir($dir)){
+			if (!mkdir($dir)){
+				return false;
+			}
+		}
+		$file = $dir."/".$lngid.".php";
+		
+		$hdl = fopen($file, 'wb');
+		
+		if (empty($hdl)){
+			return false;
+		}
+		$len = fwrite($hdl, $text);
+		fclose($hdl);
+		
+		return $len>0;
+	}
+	
+	public function SrvComponentLanguagesSave($module, $component, $languages){
+		foreach($languages as $lang => $phrases){
+			$isok = $this->SrvComponentLanguageSave($module, $component, $lang, $phrases);
+			if (!$isok){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public function SrvComponentTemplateSave($module, $component, $type, $template){
+		
+		$module = str_replace("..", "", $module);
+		$component = str_replace("..", "", $component);
+		$type = str_replace("..", "", $type);
+		
+		$file = CWD."/modules/".$module."/".$type."/".$component.".html";
+		
+		if (empty($template) && !file_exists($file)){
+			return true;
+		}
+			
+		$hdl = @fopen($file, 'wb');
+		
+		if (empty($hdl)){
+			return false;
+		}
 		
 		$len = fwrite($hdl, $template);
 		fclose($hdl);
@@ -400,6 +507,32 @@ Brick.mod.localize.tempDataVs['".$module."'] = lngVs;
 		return $len>0;
 	}
 	
+	public function SrvComponentSave($module, $component, $type, $template, $languages){
+		if (!$this->IsAdminRole()){
+			return null;
+		}
+		
+		$ret = new stdClass();
+		$lng = new stdClass();
+		$tpl = new stdClass();
+		
+		$lng->error = !$this->SrvComponentLanguagesSave($module, $component, $languages);
+		if ($lng->error){
+			return $ret;
+		}
+		$lng->text = $this->ModuleSrvLanguage($module, $component);
+		
+		$tpl->error = !$this->SrvComponentTemplateSave($module, $component, $type, $template);
+		if (!$tpl->error){
+			$tpl->text = $this->SrvComponentTemplate($module, $component, $type);
+		}
+		
+		$ret->template = $tpl;
+		$ret->language = $lng;
+		return $ret;
+	}
+	
+
 }
 
 ?>

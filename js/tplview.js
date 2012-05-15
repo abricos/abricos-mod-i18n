@@ -113,7 +113,6 @@ Component.entryPoint = function(NS){
 			case 2: ac(elWrp, 'stsource'); break;
 			case 3: ac(elWrp, 'steditor'); break;
 			}
-			
 		},
 		render: function(){
 			var TM = this._TM, gel = function(n){ return TM.getEl('row.'+n);};
@@ -298,14 +297,23 @@ Component.entryPoint = function(NS){
 		},
 		applyChanges: function(){
 			// применить изменения сделанные в редакторе
+			
 			var tpl = "";
-			this.foreach(function(w){
-				w.updateFromEditor();
-				var ti = w.titem;
-				tpl += "<!--{"+ti['n']+"}-->";
-				tpl += ti['t'];
-				tpl += "\r\n";
-			});
+			if (this.component.type != 'js'){
+				this.foreach(function(w){
+					w.updateFromEditor();
+					var ti = w.titem;
+					tpl += ti['t'];
+				});
+			}else {
+				this.foreach(function(w){
+					w.updateFromEditor();
+					var ti = w.titem;
+					tpl += "<!--{"+ti['n']+"}-->";
+					tpl += ti['t'];
+					tpl += "\r\n";
+				});
+			}
 			this.component.template = tpl;
 		}
 	};

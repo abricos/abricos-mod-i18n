@@ -185,7 +185,6 @@ Component.entryPoint = function(NS){
 			return "{#mod."+mname+"."+id+"}";
 		},
 		getSaveData: function(){
-			
 			var r = {
 				'id': this.id,
 				'tl': this.title
@@ -301,7 +300,11 @@ Component.entryPoint = function(NS){
 				this._updateTemplate(d['template']['text']);
 			}
 			if (!d['language']['error']){
-				this.module._updateJSLangData(d['language']['text']);
+				if (this.type == 'js'){
+					this.module._updateJSLangData(d['language']['text']);
+				}else{
+					this.module._updateSrvLangData(d['language']['text']);
+				}
 			}
 		},
 		_loadTemplateMethod: function(odo, callback){
@@ -312,7 +315,8 @@ Component.entryPoint = function(NS){
 			
 			odo = L.merge({
 				'module': this.module.name,
-				'component': this.name
+				'component': this.name,
+				'type': this.type
 			}, odo || {}); 
 			
 			var __self = this;
@@ -333,6 +337,7 @@ Component.entryPoint = function(NS){
 				'do': act,
 				'module': this.module.name,
 				'component': this.name,
+				'type': this.type,
 				'template': this.template,
 				'language': lngs
 			};
@@ -355,7 +360,9 @@ Component.entryPoint = function(NS){
 				__self._updateData(d);
 				NS.life(callback, d);
 			});
-		}
+		},
+		getId: function(){ return this._id; }
+		
 	});
 	NS.Component = Component;
 	
@@ -396,8 +403,12 @@ Component.entryPoint = function(NS){
 	};
 	YAHOO.extend(SrvComponent, Component, {
 		update: function(d){
-			this.id = this.name = d['nm'];
 			this.type = d['tp'] == 'b' ? 'brick' : 'content';
+			this.name = d['nm'];
+			this.id = this.getId();
+		},
+		getId: function(){
+			return this.type+'-'+this.name;
 		},
 		loadTemplate: function(callback){
 			this._loadTemplateMethod({
@@ -458,7 +469,16 @@ Component.entryPoint = function(NS){
 			});
 		},
 		_updateSrvLangData: function(d){
-			
+			var phrases = {};
+			for (var lng in d){
+				this.langs[lng] = lng;
+				var ph = new Phrase(lng, d[lng]);
+				ph.revision = 0;
+				phrases[lng] = ph;
+			}
+			this.srvComponents.foreach(function(comp){
+				comp.phrases = phrases;
+			});
 		},
 		_updateJSLangData: function(jsScript){
 			NS.tempData = null;

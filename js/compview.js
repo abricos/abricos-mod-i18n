@@ -8,7 +8,7 @@
 var Component = new Brick.Component();
 Component.requires = { 
 	mod:[
-        {name: '{C#MODNAME}', files: ['jstplview.js', 'jslngview.js']}
+        {name: '{C#MODNAME}', files: ['tplview.js', 'lngview.js']}
 	]		
 };
 Component.entryPoint = function(NS){
@@ -99,8 +99,15 @@ Component.entryPoint = function(NS){
 		onTemplateCreatePhraseBySelect: function(evt, prms){
 			var di = prms[0],
 				comp = di['component'],
-				ti = di['titem'],
-				path = comp.name+'.'+ti['n'];
+				ti = di['titem'];
+			
+			
+			var path = '';
+			if (comp.type == 'js'){
+				path = comp.name +'.'+ti['n'];
+			}else{
+				path += (comp.type == 'brick' ? 'brick' : 'content')+'.'+comp.name;
+			}
 			
 			var lng = this.lngViewWidget.lngSelWidget.getValue(),
 				ph = comp.findPhrase(lng, path);
