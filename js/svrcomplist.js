@@ -55,8 +55,6 @@ Component.entryPoint = function(NS){
 			el.parentNode.removeChild(el);
 		},
 		onClick: function(el){
-			var tp = this._TId['row'];
-			
 			var TM = this._TM, findClick = false;
 			
 			elChildForeach(TM.getEl('row.id'), function(fel){
@@ -100,7 +98,7 @@ Component.entryPoint = function(NS){
 	};
 	SrvComponentListWidget.prototype = {
 		init: function(container, module){
-			this.selectedSrvComponent = null;
+			this.selectedComponent = null;
 			this.selectChangedEvent = new CE('selectChangedEvent');
 			this.ws = [];
 
@@ -131,8 +129,11 @@ Component.entryPoint = function(NS){
 			}
 			return false;
 		},
-		selectSrvComponent: function(component){
-			this.selectSrvComponentById(component.id);
+		selectComponent: function(comp){ 
+			this.selectSrvComponent(comp);
+		},
+		selectSrvComponent: function(comp){
+			this.selectSrvComponentById(L.isNull(comp) ? 0 : comp.id);
 		},
 		selectSrvComponentById: function(componentid){
 			var reta = null;
@@ -145,15 +146,17 @@ Component.entryPoint = function(NS){
 					w.unSelect();
 				}
 			}
-			this.selectedSrvComponent = reta;
-			this.onSelectSrvComponent(reta);
+			if (this.selectedComponent != reta){
+				this.selectedComponent = reta;
+				this.onSelectComponent(reta);
+			}
 			return reta;
 		},
-		onSelectSrvComponent: function(comp){
+		onSelectComponent: function(comp){
 			this.selectChangedEvent.fire(comp);
 		},
 		onSelectByClick: function(row){
-			this.selectSrvComponent(row.component)
+			this.selectSrvComponent(row.component);
 		},
 		renderSrvComponent: function(comp){
 			var __self = this,

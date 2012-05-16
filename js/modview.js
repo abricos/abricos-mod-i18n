@@ -87,16 +87,22 @@ Component.entryPoint = function(NS){
 			this.srvCompListWidget.selectChangedEvent.subscribe(this.onSrvComponentSelectChanged, this, true);
 		},
 		onSrvComponentSelectChanged: function(evt, prm){
+			var comp = prm[0];
+			if (L.isNull(comp)){ return; }
+			this.clnCompListWidget.selectComponent(null);
 			if (L.isNull(this.viewWidget)){
 				this.viewWidget = new NS.ComponentViewWidget(this._TM.getEl('widget.jscpview'));
 			}
-			this.viewWidget.setComponent(prm[0]);
+			this.viewWidget.setComponent(comp);
 		},
 		onJSComponentSelectChanged: function(evt, prm){
+			var comp = prm[0];
+			if (L.isNull(comp)){ return; }
+			this.srvCompListWidget.selectComponent(null);
 			if (L.isNull(this.viewWidget)){
 				this.viewWidget = new NS.ComponentViewWidget(this._TM.getEl('widget.jscpview'));
 			}
-			this.viewWidget.setComponent(prm[0]);
+			this.viewWidget.setComponent(comp);
 		}
 	};
 	NS.ModuleViewWidget = ModuleViewWidget;

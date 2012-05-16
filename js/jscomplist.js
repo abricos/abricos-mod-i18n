@@ -55,8 +55,6 @@ Component.entryPoint = function(NS){
 			el.parentNode.removeChild(el);
 		},
 		onClick: function(el){
-			var tp = this._TId['row'];
-			
 			var TM = this._TM, findClick = false;
 			
 			elChildForeach(TM.getEl('row.id'), function(fel){
@@ -100,7 +98,7 @@ Component.entryPoint = function(NS){
 	};
 	JSComponentListWidget.prototype = {
 		init: function(container, module){
-			this.selectedJSComponent = null;
+			this.selectedComponent = null;
 			this.selectChangedEvent = new CE('selectChangedEvent');
 			this.ws = [];
 
@@ -131,8 +129,11 @@ Component.entryPoint = function(NS){
 			}
 			return false;
 		},
-		selectJSComponent: function(component){
-			this.selectJSComponentById(component.id);
+		selectComponent: function(comp){
+			this.selectJSComponent(comp);
+		},
+		selectJSComponent: function(comp){
+			this.selectJSComponentById(L.isNull(comp) ? 0 : comp.id);
 		},
 		selectJSComponentById: function(componentid){
 			var reta = null;
@@ -145,15 +146,17 @@ Component.entryPoint = function(NS){
 					w.unSelect();
 				}
 			}
-			this.selectedJSComponent = reta;
-			this.onSelectJSComponent(reta);
+			if (this.selectedComponent != reta){
+				this.selectedComponent = reta;
+				this.onSelectComponent(reta);
+			}
 			return reta;
 		},
-		onSelectJSComponent: function(comp){
+		onSelectComponent: function(comp){
 			this.selectChangedEvent.fire(comp);
 		},
 		onSelectByClick: function(row){
-			this.selectJSComponent(row.component)
+			this.selectJSComponent(row.component);
 		},
 		renderJSComponent: function(comp){
 			var __self = this,
