@@ -155,9 +155,9 @@ Component.entryPoint = function(NS){
 				mnm = comp.module.name;
 			
 			for (var i=0;i<arr.length;i++){
-				var ph = arr[i], tId = ph.getTemplateId(mnm), phf = null;
+				var ph = arr[i], tId = ph.getTemplateId(comp), phf = null;
 				phSrc.foreach(function(ch){
-					if (ch.getTemplateId(mnm) == tId){
+					if (ch.getTemplateId(comp) == tId){
 						phf = ch;
 						return true;
 					}
@@ -177,18 +177,21 @@ Component.entryPoint = function(NS){
 			chs1 = L.isNull(chs1) ? [] : chs1;
 			chs2 = L.isNull(chs2) ? [] : chs2;
 			
-			var TM = this._TM, lst = "", mnm = this.component.module.name;
+			var TM = this._TM, lst = "", comp = this.component;
 			var edPhList = this._edPhList;
 			
+			var parse = function(tl){
+				return tl.replace(/\</gi, "&lt;").replace(/\>/gi, "&gt;");
+			};
 			
 			// новые
 			for (var i=0;i<chs2.length;i++){
 				var ph = chs2[i],
-					tId = ph.getTemplateId(mnm),
+					tId = ph.getTemplateId(comp),
 					find = false;
 
 				for (var ii=0;ii<chs1.length;ii++){
-					if (tId == chs1[ii].getTemplateId(mnm)){
+					if (tId == chs1[ii].getTemplateId(comp)){
 						find = true;
 					}
 				}
@@ -201,7 +204,7 @@ Component.entryPoint = function(NS){
 					edPhList[kid] = {'st': 'n', 'ph': ph};
 					lst += TM.replace('row', {
 						'cst': 'fcmpstnew',
-						'key': kid, 'id': ph.id, 'ph': ph.title, 'ch': schs,
+						'key': kid, 'id': ph.id, 'ph': parse(ph.title), 'ch': schs,
 						'edt': schs == "" ? 'edt' : ''
 					});
 				}
@@ -210,11 +213,11 @@ Component.entryPoint = function(NS){
 			for (var i=0;i<chs1.length;i++){
 				var ph = chs1[i];
 				if (ph.status == 'd'){ continue; }
-				var k1 = ph.getTemplateId(mnm),
+				var k1 = ph.getTemplateId(comp),
 					find = null;
 				
 				for (var ii=0;ii<chs2.length;ii++){
-					if (chs2[ii].getTemplateId(mnm) == k1){
+					if (chs2[ii].getTemplateId(comp) == k1){
 						find = chs2[ii];
 					}
 				}
@@ -230,7 +233,7 @@ Component.entryPoint = function(NS){
 				};
 				lst += TM.replace('row', {
 					'cst': L.isNull(find) ? 'fcmpstdel' : '',
-					'key': kid, 'id': ph.id, 'ph': ph.title, 'ch': schs,
+					'key': kid, 'id': ph.id, 'ph': parse(ph.title), 'ch': schs,
 					'edt': schs == "" ? 'edt' : ''
 				});
 			}
@@ -324,7 +327,7 @@ Component.entryPoint = function(NS){
 	YAHOO.extend(PhraseRemovePanel, Brick.widget.Dialog, {
 		initTemplate: function(){
 			return buildTemplate(this, 'remove').replace('remove', {
-				'path': this.phrase.getTemplateId(this.component.module.name)
+				'path': this.phrase.getTemplateId(this.component)
 			});
 		},
 		onClick: function(el){
@@ -337,8 +340,8 @@ Component.entryPoint = function(NS){
 			return false;
 		},
 		phraseRemove: function(){
-			var TM = this._TM, gel = function(n){ return  TM.getEl('remove.'+n); },
-				__self = this;
+			var TM = this._TM, gel = function(n){ return  TM.getEl('remove.'+n); };
+			
 			Dom.setStyle(gel('btns'), 'display', 'none');
 			Dom.setStyle(gel('bloading'), 'display', '');
 			

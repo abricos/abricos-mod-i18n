@@ -412,10 +412,10 @@ Brick.mod.localize.tempDataVs['".$module."'] = lngVs;
 	private function SrvLanguagePhraseToText($ph, $lvl){
 		$t = str_repeat("\t", $lvl);
 		if (!is_array($ph->chs)){
-			$s = addslashes($ph->tl);
-			$s = str_replace("\n", "\\n", $s);
-			$s = str_replace("\r", "\\r", $s);
-			return $t."'".$ph->id."'=> '".$s."'";
+			$s = $ph->tl;
+			$s = str_replace('\\', '\\\\', $s);
+			$s = str_replace('"', '\"', $s);
+			return $t.'"'.$ph->id.'" => "'.$s.'"';
 		}
 		$text = $t."'".$ph->id."' => array(\n";
 	
@@ -449,7 +449,7 @@ Brick.mod.localize.tempDataVs['".$module."'] = lngVs;
 		
 		$text .= ");\n";
 		$text .= "?>";
-
+		
 		$module = str_replace("..", "", $module);
 		$lngid = str_replace("..", "", $lngid);
 		

@@ -172,7 +172,8 @@ Component.entryPoint = function(NS){
 			}
 			return ph.createPhrase(npath, sText);
 		},
-		getTemplateId: function(mname){
+		getTemplateId: function(comp){
+			var mname = comp.module.name;
 			var id = this.id+"", p = this.parent;
 			
 			if (!L.isNull(p.parent)){
@@ -182,7 +183,11 @@ Component.entryPoint = function(NS){
 					if (L.isNull(p.parent)){ break; }
 				}
 			}
-			return "{#mod."+mname+"."+id+"}";
+			if (comp.type == "js"){
+				return "{#mod."+mname+"."+id+"}";
+			}else{
+				return "{#"+id+"}";
+			}
 		},
 		getSaveData: function(){
 			var r = {

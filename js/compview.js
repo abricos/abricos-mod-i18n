@@ -120,7 +120,7 @@ Component.entryPoint = function(NS){
 			var phrase = comp.createPhrase(lng, path, di['text']);
 			if (L.isNull(phrase)){ return; }
 			
-			var tpPhId = phrase.getTemplateId(comp.module.name);
+			var tpPhId = phrase.getTemplateId(comp);
 			di['wrow'].replaceSelPhraseInEditor(tpPhId);
 			
 			this.tplViewWidget.applyChanges();
