@@ -1,0 +1,73 @@
+.aw-i18n .clear { clear: both; }
+.aw-i18n .right { text-align: right; }
+.aw-i18n .mtp10 { margin-top: 10px; }
+.aw-i18n .red { color: red; }
+.aw-i18n .green { color: green; }
+.aw-i18n a.abtn {
+	text-decoration: none;
+	border-bottom: 1px dotted;
+}
+.aw-i18n .bdrbtn {
+	border-bottom: 1px solid #E3E3D7;
+}
+.aw-i18n .hide {
+	display: none;
+} 
+.aw-i18n .w100 { width: 100%; }
+
+.aw-i18n .vline {
+	border-left: 1px solid #D9D9D9;
+}
+.aw-i18n .hline {
+	border-bottom: 1px solid #D9D9D9;
+}
+
+.aw-i18n .w300px {
+	width: 300px;
+}
+
+.aw-i18n .fld dl {
+	clear: left;
+	margin: 0 0 10px;
+}
+.aw-i18n .fld dt {
+	float: left;
+	font-weight: bold;
+	width: 11em;
+	padding-right: .5em;
+	font-weight: normal;
+	color: #555555;
+}
+.aw-i18n .fld dd {
+    margin: 0 0 0 11em;
+    padding: 0 0 7px 12px;
+    text-align: left;
+}
+.aw-i18n .fld dd dd {
+	padding-bottom: 1px;
+}
+.aw-i18n .fld dd input.w300,
+.aw-i18n .fld dd textarea.w300 {
+	width: 300px;
+}
+.aw-i18n .fld dd textarea {
+	height: 100px;
+}
+.aw-i18n .fld dd input.btn {
+	width: auto;
+}
+
+/* * * * * Fixed Row * * * * */
+.aw-i18n .fixrw {
+	position: relative;
+	overflow: hidden;
+	white-space: nowrap;
+}
+.aw-i18n .fixrw .shadow {
+	background: url("/modules/i18n/images/shadow.png") repeat-y scroll 0 0 transparent;
+    height: 1.3em;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 16px;
+}

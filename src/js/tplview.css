@@ -1,0 +1,68 @@
+.aw-i18n .jstplview {
+	border: 1px solid #8C8D8E;
+}
+
+.aw-i18n .jstplview .gtl {
+	position: relative;
+	background-color: #E3E3D7;
+	border-bottom: 1px solid #8C8D8E;	
+	padding: 5px;
+}
+
+.aw-i18n .jstplview .gtl {
+	padding: 7px;
+}
+
+.aw-i18n .jstplview .viewbox {
+	padding: 7px;
+	padding-bottom: none;
+}
+
+
+/* * * * * Template Row * * * * * */
+.aw-i18n .jstplview .trow {
+	margin-bottom: 7px;
+}
+.aw-i18n .jstplview .trow .thd {
+	position: relative;
+	color: #555555;
+	padding: 7px;
+	border: 1px solid #E3E3D7;
+	margin-bottom: 7px;
+	background-color: #F9F5DF;
+}
+
+.aw-i18n .jstplview .trow .tmnu {
+	position: absolute;
+	top: 5px;
+	right: 10px;
+}
+
+.aw-i18n .jstplview .trow .tmnu a {
+	margin-right: 10px;
+}
+
+.aw-i18n .jstplview .trow .tresult,
+.aw-i18n .jstplview .trow .tsource,
+.aw-i18n .jstplview .trow .teditor,
+.aw-i18n .jstplview .trow .bcreate {
+	display: none;
+}
+
+.aw-i18n .jstplview .trow .tresult {
+	min-height: 50px;
+}
+.aw-i18n .jstplview .trow .stresult .tresult {
+	display: block;
+}
+.aw-i18n .jstplview .trow .stsource .tsource {
+	display: block;
+}
+.aw-i18n .jstplview .trow .steditor .teditor {
+	display: block;
+}
+.aw-i18n .jstplview .trow .steditor .bcreate {
+	display: inline; 
+}
+
+

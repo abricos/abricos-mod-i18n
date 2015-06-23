@@ -1,0 +1,28 @@
+.aw-i18n .complist {
+	border: 1px solid #8C8D8E;
+	min-width: 250px;
+}
+.aw-i18n .complist .gtl {
+	position: relative;
+	background-color: #E3E3D7;
+	border-bottom: 1px solid #8C8D8E;	
+	padding: 5px;
+}
+
+/* * * * * Module Row * * * * */
+.aw-i18n .complist .crow {
+	border: 1px solid #E3E3D7;
+	float: left;
+	width: 148px;
+	margin: 3px;
+	cursor: pointer;
+	padding: 7px 7px;
+	overflow: hidden;
+}
+.aw-i18n .complist .crow:hover {
+	background-color: #FFF0C6;
+}
+.aw-i18n .complist .crow .sel {
+	font-weight: bold;
+}
+

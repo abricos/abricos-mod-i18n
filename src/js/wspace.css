@@ -1,0 +1,71 @@
+.aw-i18n .ws-loading {
+	margin-top: 120px;
+	text-align: center;
+}
+
+.aw-i18n .gheadermenu {
+	position: relative;
+	padding: 15px 0 0 150px;
+	height: 78px;
+}
+.aw-i18n .gheadermenu h2 {
+	padding: 5px 10px;
+	font-size: 1.5em;
+	background-color: #8c8d8e;
+	color: #fff;
+}
+.aw-i18n .gheadermenu img.logo {
+	position: absolute;
+	width: 96px;
+	height: 96px;
+	top: 0;
+	left: 30px;
+}
+.aw-i18n .gheadermenu ul.topmenu {
+	margin: 10px;
+	margin-top: 6px;
+}
+.aw-i18n .gheadermenu ul.topmenu li{
+	float: left;
+    padding: 1px 0.5em;
+    margin-right: 10px;
+}
+.aw-i18n .gheadermenu ul.topmenu li.sel {
+	background: none repeat scroll 0 0 #E3E3D7;
+    border: 1px solid #DDD9E2;
+}
+.aw-i18n .gheadermenu ul.topmenu li.sel a {
+	color: #000;
+	text-decoration: none;
+}
+
+.aw-i18n .gbmenu a {
+	text-decoration: none;
+	font-size: 1.2em;
+	color: #000;
+}
+.aw-i18n .gbmenu .gbitems {
+	margin-left: 10px;
+}
+.aw-i18n .gbmenu .gbitem {
+	background-color: #F4F4EE;
+	text-align: center;
+	cursor: pointer;
+	float: left;
+	margin: 0 1px;
+	padding: 5px 15px; 
+}
+.aw-i18n .gbmenu .gbitem:hover {
+	text-decoration: underline;	
+}
+.aw-i18n .gbmenu .current {
+	background-color: #E3E3D7;
+}
+.aw-i18n .gbmenu .current:hover {
+	text-decoration: none;	
+}
+.aw-i18n .gbmenu .line {
+    background: url("/modules/i18n/images/gmshadow.png") repeat-x scroll 0 0 transparent;
+	height: 16px;
+}
+

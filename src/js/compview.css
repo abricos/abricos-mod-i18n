@@ -1,0 +1,32 @@
+.aw-i18n .compview table.jstmplng {
+	width: 100%;
+}
+
+.aw-i18n .compview td.jstmp,
+.aw-i18n .compview td.jslng {
+	width: 50%;
+}
+
+.aw-i18n .compview {
+	position: relative;
+}
+
+.aw-i18n .compview .cmnmenu {
+	position: absolute;
+	top: 5px;
+	right: 7px;
+}
+.aw-i18n .compview .cmnmenu a {
+	margin-left: 10px;
+}
+
+.aw-i18n .compview .cmntl {
+	padding: 7px;
+	background-color: #E3E3D7;
+    border: 1px solid #8C8D8E;
+    position: relative;
+}
+.aw-i18n .compview .jstplview,
+.aw-i18n .compview .jslngview {
+	border-top: none;
+}
