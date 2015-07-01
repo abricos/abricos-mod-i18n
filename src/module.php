@@ -11,26 +11,38 @@
  */
 class I18nModule extends Ab_Module {
 
+
+    /**
+     * @var I18nModule
+     */
+    public static $instance;
+
+    private $_manager = null;
+
     /**
      * Конструктор
      */
     public function __construct(){
+        I18nModule::$instance = $this;
         $this->version = "0.2.0";
         $this->name = "i18n";
         $this->permission = new I18nPermission($this);
     }
 
     /**
-     * @return I18nManager
+     * @return I18nModuleManager
      */
     public function GetManager(){
         if (is_null($this->_manager)){
             require_once 'includes/manager.php';
-            $this->_manager = new I18nManager($this);
+            $this->_manager = new I18nModuleManager($this);
         }
         return $this->_manager;
     }
 
+    public function Bos_IsMenu(){
+        return true;
+    }
 }
 
 class I18nAction {
