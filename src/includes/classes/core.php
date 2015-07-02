@@ -1,5 +1,7 @@
 <?php
 
+require_once 'structure.php';
+
 class I18nCore {
 
     /**
@@ -19,52 +21,110 @@ class I18nCore {
 
     public function AJAX($d){
         switch ($d->do){
-            case 'init':
-                return $this->BoardData();
-            case 'language':
-                return $this->ModuleLanguage($d->module);
-            case 'srvtemplate':
-                return $this->SrvComponentTemplate($d->module, $d->component, $d->type);
-            case 'srvcompsave':
-                return $this->SrvComponentSave($d->module, $d->component, $d->type, $d->template, $d->language);
-            case 'srvcompload':
-                return $this->SrvComponentLoad($d->module, $d->component, $d->type);
+            case "fullData":
+                return $this->FullDataToAJAX();
 
-            case 'jstemplate':
-                return $this->JSComponentTemplate($d->module, $d->component);
-            case 'jscompsave':
-                return $this->JSComponentSave($d->module, $d->component, $d->type, $d->template, $d->language);
-            case 'jscompload':
-                return $this->JSComponentLoad($d->module, $d->component, $d->type);
+            case "project":
+                return $this->ProjectToAJAX();
+
+            case "configData":
+                return $this->ConfigToAJAX();
+            case "configSave":
+                return $this->ConfigSageToAJAX($d->configData);
         }
         return null;
     }
 
+    public function FullDataToAJAX(){
+        $ret = $this->ConfigToAJAX();
+        $ret->fullData = 'ok';
 
-    public function ToArray($rows, &$ids1 = "", $fnids1 = 'uid', &$ids2 = "", $fnids2 = '', &$ids3 = "", $fnids3 = ''){
-        $ret = array();
-        while (($row = $this->db->fetch_array($rows))){
-            array_push($ret, $row);
-            if (is_array($ids1)){
-                $ids1[$row[$fnids1]] = $row[$fnids1];
-            }
-            if (is_array($ids2)){
-                $ids2[$row[$fnids2]] = $row[$fnids2];
-            }
-            if (is_array($ids3)){
-                $ids3[$row[$fnids3]] = $row[$fnids3];
-            }
+        $tRet = $this->ProjectToAJAX();
+        if (isset($tRet->project)){
+            $ret->project = $tRet->project;
         }
+
         return $ret;
     }
 
-    public function ToArrayId($rows, $field = "id"){
-        $ret = array();
-        while (($row = $this->db->fetch_array($rows))){
-            $ret[$row[$field]] = $row;
-        }
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * */
+    /*                        Project                      */
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+    public function ProjectToAJAX(){
+        $ret = new stdClass();
+        $ret->err = 0;
+
+        $project = $this->Project();
+        $ret->project = $project->ToAJAX();
+
         return $ret;
     }
+
+    public function Project(){
+        if (!$this->manager->IsViewRole()){
+            return null;
+        }
+        $config = $this->Config();
+        $project = new I18nProject($config->projectPath);
+        return $project;
+    }
+
+
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * */
+    /*                        Config                       */
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+    public function ConfigToAJAX(){
+        $ret = new stdClass();
+        $ret->err = 0;
+
+        $config = $this->Config();
+        $ret->configData = $config->ToAJAX();
+
+        return $ret;
+    }
+
+    /**
+     * @return null|I18nConfig
+     */
+    public function Config(){
+        if (!$this->manager->IsViewRole()){
+            return null;
+        }
+
+        $config = new I18nConfig();
+        return $config;
+    }
+
+    public function ConfigSageToAJAX($d){
+        $res = $this->ConfigSave($d);
+
+        if (is_integer($res)){
+            $ret = new stdClass();
+            $ret->err = $res;
+            return $ret;
+        }
+
+        return $this->ConfigToAJAX();
+    }
+
+    public function ConfigSave($d){
+        if (!$this->manager->IsAdminRole()){
+            return 403;
+        }
+        $d = array_to_object($d);
+        $phs = I18nModule::$instance->GetPhrases();
+        if (isset($d->projectPath)){
+            $phs->Set('projectPath', $d->projectPath);
+        }
+        Abricos::$phrases->Save();
+        return true;
+    }
+
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * */
+    /*                     Old Functions                   */
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
     public function BoardData(){
         if (!$this->manager->IsViewRole()){
@@ -76,46 +136,6 @@ class I18nCore {
         $ret->langs = $text;
         $ret->srv = $this->BrickList();
 
-        return $ret;
-    }
-
-    public function BrickList(){
-        if (!$this->manager->IsAdminRole()){
-            return null;
-        }
-
-        $ret = array();
-        Abricos::$modules->RegisterAllModule();
-        $mods = Abricos::$modules->GetModules();
-
-        foreach ($mods as $modname => $module){
-
-            $arr = array();
-
-            $files = globa(CWD."/modules/".$modname."/brick/*.html");
-            foreach ($files as $file){
-
-                $fi = pathinfo($file);
-
-                $bk = new stdClass();
-                $bk->nm = $fi['filename'];
-                $bk->tp = 'b';
-                array_push($arr, $bk);
-            }
-
-            $files = globa(CWD."/modules/".$modname."/content/*.html");
-            foreach ($files as $file){
-
-                $fi = pathinfo($file);
-
-                $bk = new stdClass();
-                $bk->nm = $fi['filename'];
-                $bk->tp = 'c';
-                array_push($arr, $bk);
-            }
-
-            $ret[$modname] = $arr;
-        }
         return $ret;
     }
 
@@ -304,11 +324,7 @@ Brick.mod.i18n.tempDataVs['".$module."'] = lngVs;
         return true;
     }
 
-    public function SrvComponentLoad($module, $component, $type){
-
-    }
-
-    private function JSBuildTemplateFileName($module, $component){
+     private function JSBuildTemplateFileName($module, $component){
         $module = str_replace("..", "", $module);
         $component = str_replace("..", "", $component);
         return CWD."/modules/".$module."/js/".$component.".htm";
