@@ -9,16 +9,30 @@ class I18nList extends AbricosList {
 
 class I18nConfig {
 
+    public $version;
+    public $locales = array();
+
     public $projectPath = '';
 
     public function __construct(){
         $phs = I18nModule::$instance->GetPhrases();
         $this->projectPath = $phs->Get('projectPath')->value;
+
+
+        // Load locales info
+        $localesJSON = file_get_contents(CWD."/modules/i18n/locales.json");
+        $obj = json_decode($localesJSON);
+        $this->version = $obj->version;
+        foreach ($obj->list as $locale => $title){
+            $this->locales[$locale] = $title;
+        }
     }
 
     public function ToAJAX(){
         $ret = new stdClass();
         $ret->projectPath = $this->projectPath;
+        $ret->version = $this->version;
+        $ret->locales = $this->locales;
         return $ret;
     }
 }
@@ -129,7 +143,13 @@ class I18nProjectModule extends AbricosItem {
 }
 
 class I18nProjectModuleList extends I18nList {
-
+    /**
+     * @param string $moduleName
+     * @return I18nProjectModule
+     */
+    public function Get($moduleName){
+        return parent::Get($moduleName);
+    }
 }
 
 class I18nProjectItemType {
@@ -158,6 +178,13 @@ class I18nProjectItem extends AbricosItem {
 }
 
 class I18nProjectItemList extends I18nList {
+    /**
+     * @param mixed $name
+     * @return I18nProjectItem
+     */
+    public function Get($name){
+        return parent::Get($name);
+    }
 }
 
 class I18nProjectBrick extends I18nProjectItem {
@@ -172,14 +199,43 @@ class I18nProjectJS extends I18nProjectItem {
     public $type = I18nProjectItemType::JS;
 }
 
-class I18nServerPhrases extends AbricosItem {
-    public $file;
+class I18nServerTemplate {
 
-    public function __construct($file){
-        $this->file = $file;
+    public $phrases;
 
-        $fi = pathinfo($file);
-        $this->id = $fi['filename'];
+    public $content = '';
+
+    /**
+     * @param $prjModule I18nProjectModule
+     * @param $prjItem I18nProjectItem
+     */
+    public function __construct($prjModule, $prjItem){
+        $phrasesFolder = realpath($prjModule->path."/src/i18n");
+        $files = globa($phrasesFolder."/*.php");
+
+        $phrases = array();
+
+        foreach ($files as $file){
+            $fi = pathinfo($file);
+
+            $locale = $fi['filename'];
+
+            $arr = include($file);
+            if (is_array($arr)){
+                $phrases[$locale] = $arr;
+            }
+        }
+
+        $this->phrases = $phrases;
+
+        $this->content = file_get_contents($prjItem->file);
+    }
+
+    public function ToAJAX(){
+        $ret = new stdClass();
+        $ret->phrases = $this->phrases;
+        $ret->content = $this->content;
+        return $ret;
     }
 
 }

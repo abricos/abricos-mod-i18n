@@ -27,6 +27,9 @@ class I18nCore {
             case "project":
                 return $this->ProjectToAJAX();
 
+            case "template":
+                return $this->TemplateToAJAX($d->module, $d->type, $d->name);
+
             case "configData":
                 return $this->ConfigToAJAX();
             case "configSave":
@@ -62,8 +65,8 @@ class I18nCore {
     }
 
     public function Project(){
-        if (!$this->manager->IsViewRole()){
-            return null;
+        if (!$this->manager->IsAdminRole()){
+            return 403;
         }
         $config = $this->Config();
         $project = new I18nProject($config->projectPath);
@@ -89,8 +92,8 @@ class I18nCore {
      * @return null|I18nConfig
      */
     public function Config(){
-        if (!$this->manager->IsViewRole()){
-            return null;
+        if (!$this->manager->IsAdminRole()){
+            return 403;
         }
 
         $config = new I18nConfig();
@@ -121,6 +124,68 @@ class I18nCore {
         Abricos::$phrases->Save();
         return true;
     }
+
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * */
+    /*                       Template                      */
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+    public function TemplateToAJAX($module, $type, $name){
+        $ret = new stdClass();
+        $ret->err = 0;
+
+        $template = $this->Template($module, $type, $name);
+        $ret->template = $template->ToAJAX();
+
+        return $ret;
+    }
+
+    /**
+     * @param $module
+     * @param $type
+     * @param $name
+     * @return I18nServerTemplate|int|null
+     */
+    public function Template($module, $type, $name){
+        if (!$this->manager->IsAdminRole()){
+            return 403;
+        }
+
+        $project = $this->Project();
+        $prjModule = $project->moduleList->Get($module);
+        if (empty($prjModule)){
+            return 404;
+        }
+
+        $prjItem = null;
+        switch ($type){
+            case 'contents':
+                $prjItem = $prjModule->contentList->Get($name);
+                break;
+            case 'bricks':
+                $prjItem = $prjModule->brickList->Get($name);
+                break;
+            case 'jss':
+                $prjItem = $prjModule->jsList->Get($name);
+                break;
+        }
+
+        if (empty($prjItem)){
+            return 404;
+        }
+
+        $template = null;
+        switch ($type){
+            case 'contents':
+            case 'bricks':
+                $template = new I18nServerTemplate($prjModule, $prjItem);
+                break;
+            case 'jss':
+                break;
+        }
+
+        return $template;
+    }
+
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * */
     /*                     Old Functions                   */
@@ -324,7 +389,7 @@ Brick.mod.i18n.tempDataVs['".$module."'] = lngVs;
         return true;
     }
 
-     private function JSBuildTemplateFileName($module, $component){
+    private function JSBuildTemplateFileName($module, $component){
         $module = str_replace("..", "", $module);
         $component = str_replace("..", "", $component);
         return CWD."/modules/".$module."/js/".$component.".htm";

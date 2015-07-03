@@ -33,7 +33,10 @@ Component.entryPoint = function(NS){
             var fillButtonsTemplate = function(attrs, buttons, type){
                 attrs[type].each(function(item){
                     buttons[type] += tp.replace('button', [
-                        {type: type},
+                        {
+                            module: attrs.id,
+                            type: type
+                        },
                         item.getAttrs()
                     ]);
                 });
@@ -56,6 +59,8 @@ Component.entryPoint = function(NS){
             tp.gel('list').innerHTML = tp.replace('list', {
                 'rows': lst
             });
+
+            this._appURLUpdate();
         }
     }, {
         ATTRS: {

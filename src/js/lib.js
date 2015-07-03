@@ -23,6 +23,9 @@ Component.entryPoint = function(NS){
         },
         config: function(){
             return NS.URL.ws + 'configEditor/ConfigEditorWidget/';
+        },
+        template: function(module, type, name){
+            return NS.URL.ws + 'template/TemplateEditorWidget/' + module + '/' + type + '/' + name + '/';
         }
     };
 
@@ -40,6 +43,12 @@ Component.entryPoint = function(NS){
             cache: 'project',
             response: function(d){
                 return new NS.Project(d);
+            }
+        },
+        template: {
+            args: ['module', 'type', 'name'],
+            response: function(d){
+                return new NS.Template(d);
             }
         }
 

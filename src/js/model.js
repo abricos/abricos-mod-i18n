@@ -2,7 +2,7 @@ var Component = new Brick.Component();
 Component.requires = {
     yui: ['model', 'model-list'],
     mod: [
-        {name: 'sys', files: [ 'item.js', 'number.js']}
+        {name: 'sys', files: ['item.js', 'number.js']}
     ]
 };
 Component.entryPoint = function(NS){
@@ -11,7 +11,9 @@ Component.entryPoint = function(NS){
 
     NS.ConfigData = Y.Base.create('configData', Y.Model, [], {}, {
         ATTRS: {
-            projectPath: {value: ''}
+            projectPath: {value: ''},
+            version: {value: '0.1.0'},
+            locales: {value: {}}
         }
     });
 
@@ -55,15 +57,23 @@ Component.entryPoint = function(NS){
     });
 
     NS.ModuleItem = Y.Base.create('moduleItem', Y.Model, [], {}, {
-        ATTRS: {
-        }
+        ATTRS: {}
     });
 
     NS.ModuleItemList = Y.Base.create('moduleItemList', Y.ModelList, [], {
         model: NS.ModuleItem
     });
 
-    return;    /* * * * * * * * * * Old Functions * * * * * * * * */
+    NS.Template = Y.Base.create('template', Y.Model, [], {}, {
+        ATTRS: {
+            phrases: {value: []},
+            content: {value: ''}
+
+        }
+    });
+
+    return;
+    /* * * * * * * * * * Old Functions * * * * * * * * */
 
     var L = YAHOO.lang;
     var SysNS = Brick.mod.sys;
